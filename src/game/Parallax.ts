@@ -6,7 +6,14 @@ class PropRow extends Container {
   private items: Sprite[] = [];
   private span: number;
 
-  constructor(textures: Texture[], spacing: number, scaleVal: number, groundY: number, z: number) {
+  constructor(
+    textures: Texture[],
+    spacing: number,
+    scaleVal: number,
+    groundY: number,
+    z: number,
+    tint?: number,
+  ) {
     super();
     this.zIndex = z;
     const count = Math.ceil((DESIGN_WIDTH + WORLD.SCREEN_BUFFER) / spacing) + 1;
@@ -17,6 +24,7 @@ class PropRow extends Container {
       s.scale.set(scaleVal);
       s.x = i * spacing;
       s.y = groundY;
+      if (tint !== undefined) s.tint = tint;
       this.items.push(s);
       this.addChild(s);
     }
@@ -41,6 +49,7 @@ export class Parallax extends Container {
     trees: Texture[],
     bushes: Texture[],
     lamp: Texture,
+    propTint?: number,
   ) {
     super();
     this.sortableChildren = true;
@@ -66,9 +75,9 @@ export class Parallax extends Container {
 
     const groundY = DESIGN_HEIGHT - PLAYER.GROUND_Y;
     // Props sit just behind the player along the roadside; kept small so they read as scenery.
-    this.rows.push(new PropRow(trees, 460, 0.42, groundY - 10, Z.MID_BACKGROUND));
-    this.rows.push(new PropRow(bushes, 380, 0.34, groundY + 4, Z.NEAR_BACKGROUND));
-    this.rows.push(new PropRow([lamp], WORLD.LAMP_SPACING, 0.5, groundY - 6, Z.MID_BACKGROUND));
+    this.rows.push(new PropRow(trees, 460, 0.42, groundY - 10, Z.MID_BACKGROUND, propTint));
+    this.rows.push(new PropRow(bushes, 380, 0.34, groundY + 4, Z.NEAR_BACKGROUND, propTint));
+    this.rows.push(new PropRow([lamp], WORLD.LAMP_SPACING, 0.5, groundY - 6, Z.MID_BACKGROUND, propTint));
     for (const r of this.rows) this.addChild(r);
   }
 

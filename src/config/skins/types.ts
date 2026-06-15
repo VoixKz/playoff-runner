@@ -47,6 +47,8 @@ export interface SkinTheme {
   ctaGradient: [string, string];
   ctaBorder: string;
   currency: string;
+  /** Optional tint applied to parallax props (trees/bushes/lamps) to fit the theme. */
+  propTint?: number;
 }
 
 export interface SkinCopy {
@@ -63,12 +65,21 @@ export interface SkinCopy {
   praises: string[];
 }
 
+export interface PlayerRecolor {
+  hue?: number;
+  saturate?: number;
+  brightness?: number;
+  contrast?: number;
+}
+
 export interface Skin {
   id: 'original' | 'solana';
   assets: SkinAssets;
   audio: SkinAudio;
   theme: SkinTheme;
   copy: SkinCopy;
+  /** Optional stylized recolor of the player sprite (used by the Solana reskin). */
+  playerRecolor?: PlayerRecolor;
   /** Store / landing URLs for the CTA. */
   store: { google: string; apple: string };
 }

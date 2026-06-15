@@ -108,10 +108,11 @@ export class GameController {
     this.tex = { dollar, paypal, finishTape, obstacle, obstacleGlow };
 
     const scene = this.gameApp.scene;
-    this.parallax = new Parallax(bg, trees, bushes, lamp);
+    this.parallax = new Parallax(bg, trees, bushes, lamp, this.skin.theme.propTint);
     scene.addChild(this.parallax);
 
     this.player = new Player(playerSheet);
+    if (this.skin.playerRecolor) this.player.applyRecolor(this.skin.playerRecolor);
     this.player.onJump = () => this.audio.play('jump');
     scene.addChild(this.player);
 
