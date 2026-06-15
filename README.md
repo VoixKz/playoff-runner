@@ -6,10 +6,14 @@ A from-scratch clone of the Playbox **"Playoff" runner** playable ad, plus a **S
 
 ## Live
 
-- **Clone (original skin):** `index.html` → _GitHub Pages link added on deploy_
-- **Solana reskin:** `solana.html`
+**▶ Device preview (recommended):** https://voixkz.github.io/playoff-runner/
+A Playbox-style harness that frames the playable in selectable **phones & tablets** with a **portrait/landscape** toggle, **sound** mute, an **ad-pause** (MRAID viewable demo) overlay, and an **Original / Solana** skin switch.
 
-> Portrait-first playable. On desktop it sits in a centered column (like the original preview); on a phone or in Chrome DevTools device mode it fills the screen.
+**Bare single-file playables** (the actual deliverables):
+- Clone: https://voixkz.github.io/playoff-runner/play/original.html
+- Solana reskin: https://voixkz.github.io/playoff-runner/play/solana.html
+
+> The playable **fills any viewport** — portrait and landscape — with no letterboxing, and adapts to every device in the preview.
 
 ## What it does (1:1 with the reference)
 
