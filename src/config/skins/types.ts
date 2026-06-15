@@ -22,7 +22,6 @@ export interface SkinAssets {
   tapHand: string;
   failBadge: string;
   rewardCard: string; // end-card reward artwork
-  ctaButton: string;
   lightRays: string;
   bannerPortrait: string;
   bannerLandscape: string;

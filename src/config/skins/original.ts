@@ -26,7 +26,6 @@ import confetti6 from '../../../assets/original/confetti-6.png';
 import tapHand from '../../../assets/original/tap-hand.png';
 import failBadge from '../../../assets/original/fail-badge.png';
 import rewardCard from '../../../assets/original/paypal-card.webp';
-import ctaButton from '../../../assets/original/cta-button.png';
 import lightRays from '../../../assets/original/light-rays.png';
 import bannerPortrait from '../../../assets/original/banner-portrait.webp';
 import bannerLandscape from '../../../assets/original/banner-landscape.webp';
@@ -58,7 +57,6 @@ const skin: Skin = {
     tapHand,
     failBadge,
     rewardCard,
-    ctaButton,
     lightRays,
     bannerPortrait,
     bannerLandscape,

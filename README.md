@@ -19,7 +19,7 @@ A Playbox-style harness that frames the playable in selectable **phones & tablet
 
 Single-tap **auto-runner**: the runner is pinned in X while the world scrolls at a constant 600 px/s. Tap to jump (a parametric **sine arc**, 300 px / 800 ms — not gravity) over chasing enemies and cones, auto-collecting cash. After a ~22 s hand-authored level the **finish tape** snaps and the runner wins, ending on a reward count-up + install CTA. 3 HP; a brief tutorial pauses the world for the first enemy.
 
-All gameplay constants (speeds, jump, hitboxes, level script, finish-rope physics) were reverse-engineered from the reference and live in [`src/config/constants.ts`](src/config/constants.ts); the full reverse-engineering is in [`docs/reference-spec.md`](docs/reference-spec.md).
+All gameplay constants (speeds, jump, hitboxes, level script, finish-rope physics) were reverse-engineered from the reference and live in [`src/config/constants.ts`](src/config/constants.ts).
 
 ## The finish ribbon (ТЗ-required rope effect)
 
@@ -54,5 +54,6 @@ src/game      controller, player, entities, parallax, finish-rope, confetti, lev
 src/ui        DOM HUD, tutorial, end card, fail flash (CSS animations)
 src/config    constants + skins (original / solana)
 assets        original/ (extracted)  +  solana/ (generated)
-docs          reference-spec.md (reverse-engineering)  +  design spec
+scripts       single-file assemble + Solana asset generator
+docs          GitHub Pages: preview shell (index.html) + play/ (the two playables)
 ```
