@@ -3,79 +3,89 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Playoff Runner — Playable Preview</title>
+<title>Runner — Playable Preview</title>
 <style>
-  :root { --bg:#0e0e14; --panel:#17171f; --line:#262633; --txt:#e7e7ef; --muted:#9aa; --accent:#9945ff; --accent2:#14f195; }
+  :root { --accent:#9945ff; --accent2:#14f195; }
   * { margin:0; padding:0; box-sizing:border-box; }
   html,body { height:100%; }
   body {
-    background: radial-gradient(1200px 600px at 50% -10%, #1c1430 0%, var(--bg) 60%);
-    color:var(--txt); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    display:flex; flex-direction:column; overflow:hidden;
+    background:#121215;
+    color:#e7e7ef; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    overflow:hidden;
   }
-  header {
-    display:flex; align-items:center; gap:14px; padding:12px 18px; border-bottom:1px solid var(--line);
-    flex:0 0 auto;
-  }
-  header h1 { font-size:15px; font-weight:700; letter-spacing:.2px; }
-  header h1 b { background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-  .spacer { flex:1; }
-  .seg { display:inline-flex; background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
-  .seg button { background:transparent; color:var(--muted); border:0; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; }
-  .seg button.on { background:linear-gradient(90deg,var(--accent),#7b2ff7); color:#fff; }
-  .stage { flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
+
+  /* stage holds the centered device frame */
+  .stage { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:24px; padding-bottom:96px; }
   .frame-scale { transform-origin:center center; transition:transform .15s ease; }
   .frame {
-    position:relative; background:#000; border:14px solid #1b1b22; border-radius:46px;
-    box-shadow:0 0 0 2px #333, 0 30px 60px rgba(0,0,0,.6); overflow:hidden;
+    position:relative; background:#000; border:14px solid #1a1a1a; border-radius:44px;
+    box-shadow:0 0 0 2px #333, 0 25px 50px rgba(0,0,0,.5), inset 0 0 0 2px rgba(255,255,255,.05);
+    overflow:hidden;
   }
-  .frame.tablet { border-radius:26px; border-width:18px; }
+  .frame.tablet { border-radius:24px; border-width:18px; }
   .frame .notch {
-    position:absolute; top:8px; left:50%; transform:translateX(-50%);
-    width:120px; height:26px; background:#1b1b22; border-radius:0 0 16px 16px; z-index:5; pointer-events:none;
+    position:absolute; top:12px; left:50%; transform:translateX(-50%);
+    width:120px; height:30px; background:#1a1a1a; border-radius:18px; z-index:5; pointer-events:none;
   }
-  .frame.landscape .notch { top:50%; left:8px; transform:translateY(-50%); width:26px; height:120px; border-radius:0 16px 16px 0; }
+  .frame.landscape .notch { top:50%; left:12px; transform:translateY(-50%); width:30px; height:120px; }
   .frame.tablet .notch { display:none; }
   iframe { display:block; border:0; width:100%; height:100%; background:#000; }
+
   .pause-overlay {
     position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:10px;
-    background:rgba(0,0,0,.78); color:#cfcfe0; z-index:10; backdrop-filter:blur(2px);
+    background:rgba(0,0,0,.82); color:#cfcfe0; z-index:10; backdrop-filter:blur(3px);
   }
   .pause-overlay.show { display:flex; }
-  .pause-overlay svg { width:54px; height:54px; opacity:.85; }
-  .pause-overlay .t { font-size:14px; }
-  footer {
-    display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;
-    padding:12px 16px; border-top:1px solid var(--line); flex:0 0 auto;
+  .pause-overlay svg { width:52px; height:52px; opacity:.8; }
+  .pause-overlay .t { font-size:14px; } .pause-overlay .d { font-size:12px; color:#8b8b99; }
+
+  /* skin switch — top-right, subtle */
+  .skin { position:fixed; top:18px; right:18px; display:inline-flex; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:9px; overflow:hidden; z-index:20; }
+  .skin button { background:transparent; color:rgba(255,255,255,.6); border:0; padding:7px 13px; font:600 13px inherit; cursor:pointer; }
+  .skin button.on { background:linear-gradient(90deg,var(--accent),#7b2ff7); color:#fff; }
+
+  /* Playbox-style centered icon toolbar */
+  .toolbar {
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap:10px; z-index:30;
   }
-  select, .tbtn {
-    background:var(--panel); color:var(--txt); border:1px solid var(--line); border-radius:10px;
-    padding:9px 14px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;
+  .tbtn {
+    display:flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:9px;
+    color:rgba(255,255,255,.75); padding:9px 14px; font:600 14px inherit; cursor:pointer;
+    backdrop-filter:blur(8px); transition:all .15s ease; white-space:nowrap;
   }
-  select { min-width:180px; }
-  .tbtn { display:inline-flex; align-items:center; gap:7px; }
-  .tbtn:hover, select:hover { border-color:#3a3a4d; }
-  .tbtn.on { background:linear-gradient(90deg,var(--accent),#7b2ff7); color:#fff; border-color:transparent; }
-  .tbtn svg { width:16px; height:16px; }
-  .dim { color:var(--muted); font-size:12px; }
-  @media (max-width:640px) {
-    header h1 span.full { display:none; }
-    footer { gap:7px; padding:8px; }
-    select { min-width:130px; }
+  .tbtn:hover { background:rgba(255,255,255,.16); color:#fff; }
+  .tbtn.icon { padding:9px; }
+  .tbtn.on { background:rgba(153,69,255,.35); border-color:rgba(153,69,255,.6); color:#fff; }
+  .tbtn svg { width:18px; height:18px; display:block; }
+  .chev { transition:transform .15s ease; }
+  .dd.open .chev { transform:rotate(180deg); }
+
+  /* custom device dropdown (opens upward) */
+  .dd { position:relative; }
+  .device-menu {
+    position:absolute; bottom:calc(100% + 10px); left:0; min-width:240px;
+    background:#1b1b22; border:1px solid #2c2c3a; border-radius:12px; padding:8px;
+    box-shadow:0 16px 40px rgba(0,0,0,.5); display:none; max-height:60vh; overflow:auto;
   }
+  .dd.open .device-menu { display:block; }
+  .device-dropdown-group { padding:4px 0; }
+  .device-dropdown-label { font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:#7b7b8c; padding:6px 10px 4px; }
+  .device-dropdown-item { padding:9px 10px; border-radius:8px; font-size:13.5px; color:#d8d8e4; cursor:pointer; }
+  .device-dropdown-item:hover { background:rgba(255,255,255,.07); }
+  .device-dropdown-item.selected { background:linear-gradient(90deg,rgba(153,69,255,.3),rgba(20,241,149,.12)); color:#fff; }
+
+  @media (max-width:560px){ .toolbar{ gap:7px; bottom:16px; } .tbtn{ padding:8px 10px; font-size:13px; } .stage{ padding-bottom:74px; } }
 </style>
 </head>
 <body>
-  <header>
-    <h1><b>Playoff Runner</b> <span class="full">— playable preview</span></h1>
-    <div class="spacer"></div>
-    <div class="seg" id="skin">
-      <button data-skin="original" class="on">Original</button>
-      <button data-skin="solana">Solana &#11088;</button>
-    </div>
-  </header>
+  <div class="skin" id="skin">
+    <button data-skin="original" class="on">Original</button>
+    <button data-skin="solana">Solana &#11088;</button>
+  </div>
 
-  <div class="stage">
+  <div class="stage" id="stage">
     <div class="frame-scale" id="frameScale">
       <div class="frame" id="frame">
         <div class="notch"></div>
@@ -83,84 +93,134 @@
         <div class="pause-overlay" id="pauseOverlay">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
           <div class="t">Ad paused</div>
-          <div class="dim">Toggle visibility to resume</div>
+          <div class="d">Toggle visibility to resume</div>
         </div>
       </div>
     </div>
   </div>
 
-  <footer>
-    <select id="device" aria-label="Device">
-      <optgroup label="Phones">
-        <option value="iphone-16-pro-max">iPhone 16 Pro Max</option>
-        <option value="iphone-16-pro">iPhone 16 Pro</option>
-        <option value="iphone-se">iPhone SE</option>
-        <option value="pixel-7-pro">Google Pixel 7 Pro</option>
-        <option value="galaxy-s23-ultra">Samsung Galaxy S23 Ultra</option>
-        <option value="generic-android">Generic Android</option>
-      </optgroup>
-      <optgroup label="Tablets">
-        <option value="ipad-pro-12">iPad Pro 12.9"</option>
-        <option value="ipad-air">iPad Air</option>
-        <option value="galaxy-tab-s8">Samsung Galaxy Tab S8</option>
-        <option value="generic-tablet">Generic Tablet</option>
-      </optgroup>
-    </select>
-    <button class="tbtn" id="orient">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="3" width="10" height="18" rx="2"/></svg>
-      <span>Portrait</span>
+  <div class="toolbar">
+    <div class="dd" id="dd">
+      <button class="tbtn" id="deviceBtn">
+        <span id="deviceLabel">iPhone 16 Pro Max</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 15l6-6 6 6"/></svg>
+      </button>
+      <div class="device-menu" id="deviceMenu">
+        <div class="device-dropdown-group">
+          <div class="device-dropdown-label">Phones</div>
+          <div class="device-dropdown-item selected" data-value="iphone-16-pro-max">iPhone 16 Pro Max</div>
+          <div class="device-dropdown-item" data-value="iphone-16-pro">iPhone 16 Pro</div>
+          <div class="device-dropdown-item" data-value="iphone-se">iPhone SE</div>
+          <div class="device-dropdown-item" data-value="pixel-7-pro">Google Pixel 7 Pro</div>
+          <div class="device-dropdown-item" data-value="galaxy-s23-ultra">Samsung Galaxy S23 Ultra</div>
+          <div class="device-dropdown-item" data-value="generic-android">Generic Android</div>
+        </div>
+        <div class="device-dropdown-group">
+          <div class="device-dropdown-label">Tablets</div>
+          <div class="device-dropdown-item" data-value="ipad-pro-12">iPad Pro 12.9"</div>
+          <div class="device-dropdown-item" data-value="ipad-air">iPad Air</div>
+          <div class="device-dropdown-item" data-value="galaxy-tab-s8">Samsung Galaxy Tab S8</div>
+          <div class="device-dropdown-item" data-value="generic-tablet">Generic Tablet</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="tbtn" id="orient" title="Rotate">
+      <svg id="orientIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="3" width="10" height="18" rx="2"/></svg>
+      <span id="orientLabel">Portrait</span>
     </button>
-    <button class="tbtn" id="mute">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9c1.2 1 1.2 5 0 6"/></svg>
-      <span>Sound</span>
+
+    <button class="tbtn icon" id="viewable" title="Toggle viewable (ad pause)">
+      <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
     </button>
-    <button class="tbtn" id="pause">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
-      <span>Ad pause</span>
+
+    <button class="tbtn icon" id="mute" title="Mute / unmute">
+      <svg id="muteIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9c1.2 1 1.2 5 0 6"/></svg>
     </button>
-    <button class="tbtn" id="reload">
+
+    <button class="tbtn icon" id="reload" title="Reload">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>
-      <span>Reload</span>
     </button>
-  </footer>
+  </div>
 
 <script>
   var DEVICES = {
-    'iphone-16-pro-max':{w:440,h:956,type:'phone'},
-    'iphone-16-pro':{w:402,h:874,type:'phone'},
-    'iphone-se':{w:375,h:667,type:'phone'},
-    'pixel-7-pro':{w:412,h:892,type:'phone'},
-    'galaxy-s23-ultra':{w:384,h:824,type:'phone'},
-    'generic-android':{w:412,h:915,type:'phone'},
-    'ipad-pro-12':{w:1024,h:1366,type:'tablet'},
-    'ipad-air':{w:820,h:1180,type:'tablet'},
-    'galaxy-tab-s8':{w:800,h:1280,type:'tablet'},
-    'generic-tablet':{w:768,h:1024,type:'tablet'}
+    'iphone-16-pro-max':{w:440,h:956,type:'phone',label:'iPhone 16 Pro Max'},
+    'iphone-16-pro':{w:402,h:874,type:'phone',label:'iPhone 16 Pro'},
+    'iphone-se':{w:375,h:667,type:'phone',label:'iPhone SE'},
+    'pixel-7-pro':{w:412,h:892,type:'phone',label:'Google Pixel 7 Pro'},
+    'galaxy-s23-ultra':{w:384,h:824,type:'phone',label:'Samsung Galaxy S23 Ultra'},
+    'generic-android':{w:412,h:915,type:'phone',label:'Generic Android'},
+    'ipad-pro-12':{w:1024,h:1366,type:'tablet',label:'iPad Pro 12.9"'},
+    'ipad-air':{w:820,h:1180,type:'tablet',label:'iPad Air'},
+    'galaxy-tab-s8':{w:800,h:1280,type:'tablet',label:'Samsung Galaxy Tab S8'},
+    'generic-tablet':{w:768,h:1024,type:'tablet',label:'Generic Tablet'}
   };
+  var ICON_PORTRAIT = '<rect x="7" y="3" width="10" height="18" rx="2"/>';
+  var ICON_LANDSCAPE = '<rect x="3" y="7" width="18" height="10" rx="2"/>';
+  var ICON_SOUND = '<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9c1.2 1 1.2 5 0 6"/>';
+  var ICON_MUTED = '<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l4 6M21 9l-4 6"/>';
+  var ICON_EYE = '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>';
+  var ICON_EYE_OFF = '<path d="M3 3l18 18M10.6 5.2A10.6 10.6 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3.3 4M6.6 6.6A18 18 0 0 0 2 12s3.5 7 10 7a10.6 10.6 0 0 0 3.4-.6"/>';
+
   var state = { device:'iphone-16-pro-max', orientation:'portrait', skin:'original', muted:false, paused:false };
   var el = function(id){ return document.getElementById(id); };
-  var frame = el('frame'), frameScale = el('frameScale'), game = el('game');
-  var stage = document.querySelector('.stage');
+  var frame = el('frame'), frameScale = el('frameScale'), game = el('game'), stage = el('stage');
 
-  function post(msg){ try{ if(game.contentWindow) game.contentWindow.postMessage(msg,'*'); }catch(e){} }
+  function post(m){ try{ if(game.contentWindow) game.contentWindow.postMessage(m,'*'); }catch(e){} }
   function loadSkin(){ game.src = './play/' + state.skin + '.html'; }
 
   function layout(){
-    var d = DEVICES[state.device];
-    var landscape = state.orientation === 'landscape';
-    var w = landscape ? d.h : d.w;
-    var h = landscape ? d.w : d.h;
-    frame.style.width = w + 'px';
-    frame.style.height = h + 'px';
+    var d = DEVICES[state.device], land = state.orientation==='landscape';
+    var w = land ? d.h : d.w, h = land ? d.w : d.h;
+    frame.style.width = w+'px'; frame.style.height = h+'px';
     frame.classList.toggle('tablet', d.type==='tablet');
-    frame.classList.toggle('landscape', landscape);
-    var bezel = (d.type==='tablet'?36:28);
-    var fw = w + bezel, fh = h + bezel;
-    var avail = stage.getBoundingClientRect();
-    var s = Math.min((avail.width-32)/fw, (avail.height-32)/fh, 1);
-    frameScale.style.transform = 'scale(' + s + ')';
+    frame.classList.toggle('landscape', land);
+    var bezel = d.type==='tablet'?36:28;
+    var a = stage.getBoundingClientRect();
+    var s = Math.min((a.width-32)/(w+bezel), (a.height-32)/(h+bezel), 1);
+    frameScale.style.transform = 'scale('+s+')';
   }
 
+  // device dropdown
+  var dd = el('dd');
+  el('deviceBtn').addEventListener('click', function(e){ e.stopPropagation(); dd.classList.toggle('open'); });
+  document.addEventListener('click', function(){ dd.classList.remove('open'); });
+  el('deviceMenu').addEventListener('click', function(e){
+    var it = e.target.closest('.device-dropdown-item'); if(!it) return;
+    state.device = it.dataset.value;
+    var items = el('deviceMenu').querySelectorAll('.device-dropdown-item');
+    for (var i=0;i<items.length;i++) items[i].classList.toggle('selected', items[i]===it);
+    el('deviceLabel').textContent = DEVICES[state.device].label;
+    dd.classList.remove('open'); layout();
+  });
+
+  // orientation
+  el('orient').addEventListener('click', function(){
+    state.orientation = state.orientation==='portrait'?'landscape':'portrait';
+    var land = state.orientation==='landscape';
+    el('orientLabel').textContent = land?'Landscape':'Portrait';
+    el('orientIcon').innerHTML = land?ICON_LANDSCAPE:ICON_PORTRAIT;
+    layout();
+  });
+  // viewable / ad pause
+  el('viewable').addEventListener('click', function(){
+    state.paused = !state.paused;
+    el('pauseOverlay').classList.toggle('show', state.paused);
+    el('viewable').classList.toggle('on', state.paused);
+    el('eyeIcon').innerHTML = state.paused?ICON_EYE_OFF:ICON_EYE;
+    post({type: state.paused?'pause':'resume'});
+  });
+  // mute
+  el('mute').addEventListener('click', function(){
+    state.muted = !state.muted;
+    el('mute').classList.toggle('on', state.muted);
+    el('muteIcon').innerHTML = state.muted?ICON_MUTED:ICON_SOUND;
+    post({type:'mute', muted:state.muted});
+  });
+  // reload
+  el('reload').addEventListener('click', function(){ loadSkin(); });
+  // skin
   el('skin').addEventListener('click', function(e){
     var b = e.target.closest('button'); if(!b) return;
     state.skin = b.dataset.skin;
@@ -168,30 +228,9 @@
     for (var i=0;i<kids.length;i++) kids[i].classList.toggle('on', kids[i]===b);
     loadSkin();
   });
-  el('device').addEventListener('change', function(e){ state.device = e.target.value; layout(); });
-  el('orient').addEventListener('click', function(){
-    state.orientation = state.orientation==='portrait' ? 'landscape' : 'portrait';
-    el('orient').querySelector('span').textContent = state.orientation==='portrait'?'Portrait':'Landscape';
-    el('orient').classList.toggle('on', state.orientation==='landscape');
-    layout();
-  });
-  el('mute').addEventListener('click', function(){
-    state.muted = !state.muted;
-    el('mute').classList.toggle('on', state.muted);
-    el('mute').querySelector('span').textContent = state.muted?'Muted':'Sound';
-    post({type:'mute', muted:state.muted});
-  });
-  el('pause').addEventListener('click', function(){
-    state.paused = !state.paused;
-    el('pauseOverlay').classList.toggle('show', state.paused);
-    el('pause').classList.toggle('on', state.paused);
-    post({type: state.paused?'pause':'resume'});
-  });
-  el('reload').addEventListener('click', function(){ loadSkin(); });
 
   window.addEventListener('resize', layout);
-  loadSkin();
-  layout();
+  loadSkin(); layout();
 </script>
 </body>
 </html>
