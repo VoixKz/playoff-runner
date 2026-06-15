@@ -1,0 +1,28 @@
+{
+  "name": "playoff-runner",
+  "version": "1.0.0",
+  "description": "PixiJS auto-runner playable — 1:1 clone of the Playbox 'Playoff' runner + Solana/Toly reskin",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:solana": "SKIN=solana vite",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "build:original": "SKIN=original vite build --outDir dist/original --emptyOutDir",
+    "build:solana": "SKIN=solana vite build --outDir dist/solana --emptyOutDir",
+    "assemble": "node scripts/assemble.mjs",
+    "build": "npm run build:original && npm run build:solana && npm run assemble",
+    "preview": "vite preview --outDir dist --port 4173"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vite-plugin-singlefile": "^2.0.3",
+    "vitest": "^2.1.4"
+  },
+  "dependencies": {
+    "howler": "^2.2.4",
+    "pixi.js": "^8.6.0"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:burnt-carriage-ef6.notion.site)",
+      "Bash(npm -v)",
+      "Bash(curl -sL --max-time 30 \"https://playbox.play.plbx.ai/playoff/runner\" -o /tmp/ref_runner.html -w \"HTTP %{http_code} | size %{size_download} bytes | final %{url_effective}\\\\n\")",
+      "Read(//tmp/**)",
+      "Bash(curl -sL --max-time 40 \"https://playbox.play.plbx.ai/playoff/runner/_raw\" -o ref_game.html -w \"HTTP %{http_code} | size %{size_download} bytes | final %{url_effective}\\\\n\")"
+    ]
+  }
+}
