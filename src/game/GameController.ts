@@ -126,10 +126,23 @@ export class GameController {
     this.buildFooter();
 
     this.setupInput();
+    this.gameApp.setResizeHandler(() => this.layoutWorld());
+    this.layoutWorld();
     this.gameApp.ticker.add((ticker) => this.update(Math.min(ticker.deltaMS, 50)));
 
     this.sm.transition('INTRO');
     this.tutorial.show('start');
+  }
+
+  /** Reposition the player + swap footer banner for the current viewport. */
+  private layoutWorld(): void {
+    const ww = this.gameApp.layout.worldWidth;
+    this.player.x = Math.max(DESIGN_WIDTH * 0.18, Math.min(ww * 0.16, 320));
+    if (this.footerBanner) {
+      this.footerBanner.src = this.gameApp.layout.isPortrait
+        ? this.skin.assets.bannerPortrait
+        : this.skin.assets.bannerLandscape;
+    }
   }
 
   private setupInput(): void {
@@ -141,6 +154,13 @@ export class GameController {
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) this.pause();
       else this.resume();
+    });
+    // Control messages from the preview shell (device-frame harness).
+    window.addEventListener('message', (e: MessageEvent) => {
+      const t = (e.data as { type?: string } | null)?.type;
+      if (t === 'mute') this.audio.setMuted(!!(e.data as { muted?: boolean }).muted);
+      else if (t === 'pause') this.pause();
+      else if (t === 'resume') this.resume();
     });
   }
 
@@ -192,7 +212,7 @@ export class GameController {
   }
 
   private spawn(entry: { type: string; yOffset?: number; pauseForTutorial?: boolean; warningLabel?: boolean }): void {
-    const spawnX = DESIGN_WIDTH * 1.5;
+    const spawnX = this.gameApp.layout.worldWidth + 250; // just off the actual right edge
     const scene = this.gameApp.scene;
     if (entry.type === 'collectible') {
       const isDollar = Math.random() < COLLECTIBLE.DOLLAR_RATIO;
@@ -377,12 +397,14 @@ export class GameController {
 
   // ---------- footer ----------
   private footer?: HTMLDivElement;
+  private footerBanner?: HTMLImageElement;
   private buildFooter(): void {
     const footer = document.createElement('div');
     footer.className = 'footer';
     const banner = document.createElement('img');
     banner.className = 'footer-banner';
     banner.src = this.skin.assets.bannerPortrait;
+    this.footerBanner = banner;
     const cta = document.createElement('div');
     cta.className = 'footer-cta';
     cta.textContent = 'DOWNLOAD';

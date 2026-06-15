@@ -1,6 +1,9 @@
 import { Container, Sprite, Texture } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH, PLAYER, WORLD, Z } from '../config/constants';
 
+/** Horizontal coverage for prop rows — enough to fill the widest landscape device. */
+const COVER_WIDTH = 4096;
+
 /** A row of evenly-spaced, wrap-around props (pooled — created once, recycled forever). */
 class PropRow extends Container {
   private items: Sprite[] = [];
@@ -16,7 +19,8 @@ class PropRow extends Container {
   ) {
     super();
     this.zIndex = z;
-    const count = Math.ceil((DESIGN_WIDTH + WORLD.SCREEN_BUFFER) / spacing) + 1;
+    // Cover enough width for any landscape device (worldWidth maxes ~2800).
+    const count = Math.ceil(COVER_WIDTH / spacing) + 1;
     this.span = count * spacing;
     for (let i = 0; i < count; i++) {
       const s = new Sprite(textures[i % textures.length]);

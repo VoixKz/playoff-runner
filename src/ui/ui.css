@@ -122,7 +122,11 @@
 }
 .footer-banner {
   width: 100%;
+  height: auto;
   display: block;
+  max-height: 22vh; /* never let the banner dominate a short landscape viewport */
+  object-fit: cover;
+  object-position: center;
 }
 .footer-cta {
   position: absolute;
