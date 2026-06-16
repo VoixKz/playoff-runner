@@ -217,17 +217,20 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+/* white reward card: logo on top, amount stacked below (reference win/lose screen) */
 .reward-card {
   position: relative;
-  width: 240px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  aspect-ratio: 808 / 551;
+  width: min(80vw, 360px);
+  background: #fff;
+  border: 5px solid var(--card-border, #003087);
+  border-radius: 24px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4);
   transform: scale(0);
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 30px 26px 26px;
 }
 .reward-card.bounce {
   animation: card-bounce 0.6s cubic-bezier(0.2, 1.5, 0.5, 1) forwards;
@@ -237,11 +240,17 @@
   60% { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
+.reward-logo {
+  width: 60%;
+  max-height: 110px;
+  object-fit: contain;
+}
 .end-amount {
-  font-size: 40px;
+  font-size: clamp(36px, 10vw, 58px);
   font-weight: 900;
-  color: #14a85b;
-  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.6);
+  color: var(--amount-color, #0b0b0b);
+  letter-spacing: 0.5px;
+  line-height: 1;
 }
 .countdown {
   font-size: 18px;

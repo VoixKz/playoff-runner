@@ -3,20 +3,21 @@ import { BACKGROUND_COLOR, DESIGN_WIDTH, DESIGN_HEIGHT } from '../config/constan
 
 export interface Layout {
   scale: number;
-  /** Visible design-space width = innerWidth / scale. The world fills this fully. */
-  worldWidth: number;
+  /** Spawn-math width; swaps with orientation like the reference (`yt`): 720 / 1280. */
+  workingWidth: number;
   isPortrait: boolean;
 }
 
 /**
- * Wraps the Pixi Application. Scales the 1280-tall design space to the viewport
- * height and lets the world FILL the full width (no letterbox) in any aspect —
- * portrait or landscape. DPR clamped at 2.
+ * Wraps the Pixi Application. Faithful to the reference `setupResponsiveScaling`:
+ * scale the 1280-tall design space to viewport height and center the 720-wide
+ * column. The background tiles + parallax props span far wider than the column, so
+ * the scene fills both portrait and landscape with no letterbox. DPR clamped at 2.
  */
 export class GameApp {
   readonly app = new Application();
   readonly scene = new Container(); // scaled game world; HUD is separate DOM
-  layout: Layout = { scale: 1, worldWidth: DESIGN_WIDTH, isPortrait: true };
+  layout: Layout = { scale: 1, workingWidth: DESIGN_WIDTH, isPortrait: true };
   private onResize?: () => void;
 
   async init(bgColor = BACKGROUND_COLOR): Promise<void> {
@@ -41,14 +42,15 @@ export class GameApp {
     window.addEventListener('orientationchange', this.handleOrientation);
   }
 
-  /** Recompute scale to fit height; the world fills the full width (no bars). */
+  /** Fit height, center the 720-wide design column (reference setupResponsiveScaling). */
   applyLayout(): void {
     const w = window.innerWidth;
     const h = window.innerHeight;
+    const isPortrait = h >= w;
     const scale = h / DESIGN_HEIGHT;
     this.scene.scale.set(scale);
-    this.scene.position.set(0, 0);
-    this.layout = { scale, worldWidth: w / scale, isPortrait: h >= w };
+    this.scene.position.set((w - DESIGN_WIDTH * scale) / 2, 0);
+    this.layout = { scale, workingWidth: isPortrait ? DESIGN_WIDTH : DESIGN_HEIGHT, isPortrait };
     this.onResize?.();
   }
 

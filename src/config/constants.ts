@@ -52,9 +52,8 @@ export const OBSTACLE = {
 } as const;
 
 export const COLLECTIBLE = {
-  DOLLAR_VALUE: 20,
-  PAYPAL_CARD_MIN: 5,
-  PAYPAL_CARD_MAX: 50,
+  DOLLAR_VALUE: 20, // plain dollar
+  PAYPAL_VALUE: 40, // PayPal card
   DOLLAR_RATIO: 0.6, // < 0.6 → dollar, else paypal card
   RADIUS: 60, // world-space pickup radius
   Y_BASE: 800, // DESIGN_HEIGHT - GROUND_Y - 200

@@ -33,7 +33,7 @@ import { EndCard } from '../ui/EndCard';
 import { showFailFlash } from '../ui/Fail';
 
 interface Warning {
-  text: Text;
+  node: Container;
   obstacle: Obstacle;
   t: number;
 }
@@ -134,10 +134,8 @@ export class GameController {
     this.tutorial.show('start');
   }
 
-  /** Reposition the player + swap footer banner for the current viewport. */
+  /** Swap the footer banner for the current orientation (player stays at 0.18·W). */
   private layoutWorld(): void {
-    const ww = this.gameApp.layout.worldWidth;
-    this.player.x = Math.max(DESIGN_WIDTH * 0.18, Math.min(ww * 0.16, 320));
     if (this.footerBanner) {
       this.footerBanner.src = this.gameApp.layout.isPortrait
         ? this.skin.assets.bannerPortrait
@@ -174,7 +172,7 @@ export class GameController {
 
   private start(): void {
     if (!this.sm.transition('RUNNING')) return;
-    this.jumpingEnabled = true;
+    // Jumping stays locked until the first obstacle tutorial (reference behaviour).
     this.player.run();
     this.tutorial.hide();
     this.audio.play('music');
@@ -204,7 +202,7 @@ export class GameController {
     this.distance += (this.speed * dtMs) / 1000;
     this.player.update(dtMs);
 
-    for (const entry of this.scheduler.due(this.distance, DESIGN_WIDTH)) this.spawn(entry);
+    for (const entry of this.scheduler.due(this.distance, this.gameApp.layout.workingWidth)) this.spawn(entry);
     this.updateEntities(dtMs);
     this.checkTutorialTrigger();
     this.checkCollisions();
@@ -212,13 +210,11 @@ export class GameController {
   }
 
   private spawn(entry: { type: string; yOffset?: number; pauseForTutorial?: boolean; warningLabel?: boolean }): void {
-    const spawnX = this.gameApp.layout.worldWidth + 250; // just off the actual right edge
+    const spawnX = this.gameApp.layout.workingWidth * 1.5; // 1.5 screen-widths off the right
     const scene = this.gameApp.scene;
     if (entry.type === 'collectible') {
       const isDollar = Math.random() < COLLECTIBLE.DOLLAR_RATIO;
-      const value = isDollar
-        ? COLLECTIBLE.DOLLAR_VALUE
-        : Math.floor(COLLECTIBLE.PAYPAL_CARD_MIN + Math.random() * (COLLECTIBLE.PAYPAL_CARD_MAX - COLLECTIBLE.PAYPAL_CARD_MIN));
+      const value = isDollar ? COLLECTIBLE.DOLLAR_VALUE : COLLECTIBLE.PAYPAL_VALUE;
       const c = new Collectible(isDollar ? this.tex.dollar : this.tex.paypal, isDollar ? 'dollar' : 'paypal', value);
       c.x = spawnX;
       c.y = COLLECTIBLE.Y_BASE - (entry.yOffset ?? 0);
@@ -245,19 +241,29 @@ export class GameController {
   }
 
   private addWarning(o: Obstacle): void {
-    const style = new TextStyle({
-      fontFamily: this.skin.theme.fontFamily,
-      fontSize: 32,
-      fill: '#ff2b2b',
-      fontWeight: '900',
-      stroke: { color: '#ffffff', width: 4 },
+    const node = new Container();
+    const text = new Text({
+      text: 'EVADE',
+      style: new TextStyle({
+        fontFamily: this.skin.theme.fontFamily,
+        fontSize: 44,
+        fill: '#ff1a1a',
+        fontWeight: '900',
+        stroke: { color: '#5a0000', width: 3 },
+      }),
     });
-    const text = new Text({ text: 'EVADE', style });
     text.anchor.set(0.5);
-    text.y = OBSTACLE.WARNING_Y;
-    text.zIndex = Z.WARNING_LABEL;
-    this.gameApp.scene.addChild(text);
-    this.warnings.push({ text, obstacle: o, t: 0 });
+    const bw = text.width + 56;
+    const bh = text.height + 28;
+    const bg = new Graphics()
+      .roundRect(-bw / 2, -bh / 2, bw, bh, 18)
+      .fill(0xffd21a)
+      .stroke({ color: 0xc79a00, width: 5 });
+    node.addChild(bg, text);
+    node.y = OBSTACLE.WARNING_Y;
+    node.zIndex = Z.WARNING_LABEL;
+    this.gameApp.scene.addChild(node);
+    this.warnings.push({ node, obstacle: o, t: 0 });
   }
 
   private updateEntities(dtMs: number): void {
@@ -266,8 +272,8 @@ export class GameController {
     for (const e of this.enemies) e.update(dtMs, this.speed);
     for (const w of this.warnings) {
       w.t += dtMs;
-      w.text.x = w.obstacle.x;
-      w.text.scale.set(1 + Math.sin(w.t * OBSTACLE.WARNING_PULSE) * 0.1);
+      w.node.x = w.obstacle.x;
+      w.node.scale.set(1 + Math.sin(w.t * OBSTACLE.WARNING_PULSE) * 0.1);
     }
     this.cleanup();
   }
@@ -278,7 +284,7 @@ export class GameController {
     this.enemies = this.filterOut(this.enemies, (e) => e.isOffScreen());
     this.warnings = this.warnings.filter((w) => {
       if (w.obstacle.destroyed || w.obstacle.x < -200) {
-        w.text.destroy();
+        w.node.destroy({ children: true });
         return false;
       }
       return true;

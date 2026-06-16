@@ -1,33 +1,37 @@
 import { Container, Sprite, Texture } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH, PLAYER, WORLD, Z } from '../config/constants';
 
-/** Horizontal coverage for prop rows — enough to fill the widest landscape device. */
-const COVER_WIDTH = 4096;
+// Horizontal coverage for prop rows — wide enough to fill landscape (centered column).
+const COVER_START = -1400;
+const COVER_WIDTH = 5600;
 
-/** A row of evenly-spaced, wrap-around props (pooled — created once, recycled forever). */
+/**
+ * A row of evenly-spaced, wrap-around props (pooled — created once, recycled forever).
+ * Placement (anchor / y / scale) matches the reference per prop type.
+ */
 class PropRow extends Container {
   private items: Sprite[] = [];
-  private span: number;
+  private span = 0;
 
   constructor(
     textures: Texture[],
     spacing: number,
     scaleVal: number,
-    groundY: number,
+    y: number,
+    anchorY: number,
     z: number,
     tint?: number,
   ) {
     super();
     this.zIndex = z;
-    // Cover enough width for any landscape device (worldWidth maxes ~2800).
     const count = Math.ceil(COVER_WIDTH / spacing) + 1;
     this.span = count * spacing;
     for (let i = 0; i < count; i++) {
       const s = new Sprite(textures[i % textures.length]);
-      s.anchor.set(0.5, 1);
+      s.anchor.set(0.5, anchorY);
       s.scale.set(scaleVal);
-      s.x = i * spacing;
-      s.y = groundY;
+      s.x = COVER_START + i * spacing;
+      s.y = y;
       if (tint !== undefined) s.tint = tint;
       this.items.push(s);
       this.addChild(s);
@@ -37,59 +41,61 @@ class PropRow extends Container {
   update(dx: number): void {
     for (const s of this.items) {
       s.x -= dx;
-      if (s.x < -this.span / this.items.length - 100) s.x += this.span;
+      if (s.x < COVER_START) s.x += this.span;
     }
   }
 }
 
-/** Scrolling world: 6 mirrored cover-scaled bg tiles + tree/bush/lamp prop rows. */
+/**
+ * Scrolling world: 6 mirrored cover-scaled background tiles + tree / lamp / bush rows.
+ * Trees & lamps hang from the top (anchor 0.5,0), bushes sit at the horizon (y = roadY-305).
+ */
 export class Parallax extends Container {
   private tiles: Container[] = [];
   private tileWidth = 0;
   private rows: PropRow[] = [];
 
-  constructor(
-    bg: Texture,
-    trees: Texture[],
-    bushes: Texture[],
-    lamp: Texture,
-    propTint?: number,
-  ) {
+  constructor(bg: Texture, trees: Texture[], bushes: Texture[], lamp: Texture, propTint?: number) {
     super();
     this.sortableChildren = true;
 
     const bgScale = Math.max(DESIGN_WIDTH / bg.width, DESIGN_HEIGHT / bg.height);
     this.tileWidth = bg.width * bgScale;
+    const bgY = (DESIGN_HEIGHT - bg.height * bgScale) / 2;
     for (let i = 0; i < WORLD.BG_TILE_COUNT; i++) {
       const tile = new Container();
       const s = new Sprite(bg);
       s.anchor.set(0, 0);
+      s.scale.set(bgScale);
       if (i % 2 === 1) {
-        s.scale.x = -1;
-        s.x = bg.width; // flip in place so tile still occupies [0, width]
+        // mirror in place so the tile still fills local [0, tileWidth] and seams hide
+        s.scale.x = -bgScale;
+        s.x = this.tileWidth;
       }
       tile.addChild(s);
-      tile.scale.set(bgScale);
-      tile.x = i * this.tileWidth;
-      tile.y = 0;
+      tile.y = bgY;
+      tile.x = (i - 1) * this.tileWidth; // start one tile to the left
       tile.zIndex = Z.FAR_BACKGROUND;
       this.tiles.push(tile);
       this.addChild(tile);
     }
 
-    const groundY = DESIGN_HEIGHT - PLAYER.GROUND_Y;
-    // Props sit just behind the player along the roadside; kept small so they read as scenery.
-    this.rows.push(new PropRow(trees, 460, 0.42, groundY - 10, Z.MID_BACKGROUND, propTint));
-    this.rows.push(new PropRow(bushes, 380, 0.34, groundY + 4, Z.NEAR_BACKGROUND, propTint));
-    this.rows.push(new PropRow([lamp], WORLD.LAMP_SPACING, 0.5, groundY - 6, Z.MID_BACKGROUND, propTint));
+    const roadY = DESIGN_HEIGHT - PLAYER.GROUND_Y; // 1000
+    // trees: big, hang from the top
+    this.rows.push(new PropRow(trees, 420, 1.81, 0, 0, Z.MID_BACKGROUND, propTint));
+    // lamps: hang from the top, y=50
+    this.rows.push(new PropRow([lamp], WORLD.LAMP_SPACING, 1.8, 50, 0, Z.NEAR_BACKGROUND, propTint));
+    // bushes: sit at the horizon line (above the road)
+    this.rows.push(new PropRow(bushes, 300, 0.52, roadY - 305, 1, Z.NEAR_BACKGROUND, propTint));
     for (const r of this.rows) this.addChild(r);
   }
 
   update(dtMs: number, speed: number): void {
     const dx = (speed * dtMs) / 1000;
+    const wrap = this.tileWidth * this.tiles.length;
     for (const tile of this.tiles) {
       tile.x -= dx;
-      if (tile.x <= -this.tileWidth) tile.x += this.tileWidth * this.tiles.length;
+      if (tile.x + this.tileWidth < 0) tile.x += wrap; // wrap once fully off the left
     }
     for (const r of this.rows) r.update(dx);
   }
