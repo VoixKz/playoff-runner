@@ -2,8 +2,10 @@ import { Container, Sprite, Texture } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH, PLAYER, WORLD, Z } from '../config/constants';
 
 // Horizontal coverage for prop rows — wide enough to fill landscape (centered column).
-const COVER_START = -1400;
-const COVER_WIDTH = 5600;
+// COVER_START reaches well left of the landscape viewport's left edge (~ -1133 in
+// scene space) so props never run out on the left.
+const COVER_START = -2400;
+const COVER_WIDTH = 6600;
 
 /**
  * A row of evenly-spaced, wrap-around props (pooled — created once, recycled forever).
@@ -74,7 +76,9 @@ export class Parallax extends Container {
       }
       tile.addChild(s);
       tile.y = bgY;
-      tile.x = (i - 1) * this.tileWidth; // start one tile to the left
+      // Start two tiles to the left: the landscape viewport's left edge sits near
+      // scene-x -1133, so the leftmost background must reach past that at all times.
+      tile.x = (i - 2) * this.tileWidth;
       tile.zIndex = Z.FAR_BACKGROUND;
       this.tiles.push(tile);
       this.addChild(tile);
@@ -95,7 +99,10 @@ export class Parallax extends Container {
     const wrap = this.tileWidth * this.tiles.length;
     for (const tile of this.tiles) {
       tile.x -= dx;
-      if (tile.x + this.tileWidth < 0) tile.x += wrap; // wrap once fully off the left
+      // Recycle a tile only once it's a FULL width past the left anchor (-tileWidth),
+      // so the left coverage floor stays at ~ -2·tileWidth and never exposes the
+      // clear colour (the beige flash). wrap = 6·tileWidth keeps mirror parity.
+      if (tile.x + this.tileWidth < -this.tileWidth) tile.x += wrap;
     }
     for (const r of this.rows) r.update(dx);
   }

@@ -12,7 +12,9 @@ export class Hud {
     this.hearts.className = 'hp-container';
 
     this.badge = document.createElement('div');
-    this.badge.className = 'money-badge';
+    // skin id as a class so the amount can sit INSIDE the PayPal card (original)
+    // or beside the full-graphic card (solana).
+    this.badge.className = `money-badge ${skin.id}`;
     const img = document.createElement('img');
     img.src = skin.assets.rewardCard;
     this.score = document.createElement('div');

@@ -18,28 +18,43 @@
   opacity: 0.3;
 }
 
+/* Fixed-px size + corner anchor → identical in portrait and landscape (no vw/vh). */
 .money-badge {
   position: absolute;
   top: 18px;
   right: 22px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px; /* breathing room between the PayPal card and the amount */
+  height: 68px;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
 }
 .money-badge img {
-  height: 56px;
+  height: 100%;
   display: block;
 }
+/* The amount sits INSIDE the card's empty right area (matches the reference). */
 #score-display {
-  /* normal flex child: vertically centred against the card, with a gap */
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 42%; /* just past the PayPal logo */
+  right: 6%; /* inside the card's right border */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 900;
-  font-size: 26px;
+  font-size: 23px;
   color: var(--counter-color, #003087);
   white-space: nowrap;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+/* Solana's reward card is a full graphic with no slot — keep the amount beside it. */
+.money-badge.solana {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.money-badge.solana #score-display {
+  position: static;
+  inset: auto;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 #score-display.pulse {
   animation: score-pulse 0.3s ease;
@@ -131,15 +146,17 @@
 .footer-cta {
   position: absolute;
   /* sit in the empty right-hand area the banner art reserves, vertically centred */
-  right: 24px;
   bottom: 50%;
   translate: 0 50%;
-  padding: 13px 32px;
-  border-radius: 14px; /* rounded rectangle, matching the reference CTA */
+  /* Adaptive size: compact on narrow portrait phones, full size (capped) on wide
+     landscape / tablets. Scales with viewport width via vw, clamped both ends. */
+  right: clamp(12px, 3vw, 24px);
+  padding: clamp(6px, 1.6vw, 13px) clamp(14px, 4vw, 32px);
+  border-radius: clamp(8px, 2vw, 14px);
   border: 3px solid var(--cta-border, #e07800);
   background: linear-gradient(180deg, var(--cta-from, #ffe44d), var(--cta-to, #ff9500));
   color: #5a2d00;
-  font-size: 22px;
+  font-size: clamp(12px, 3.6vw, 22px);
   font-weight: 900;
   letter-spacing: 0.5px;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
