@@ -8,9 +8,12 @@ export class Enemy extends Container {
 
   constructor(sheet: Spritesheet) {
     super();
-    const frames =
+    const all =
       (sheet.animations.default as Texture[]) ??
       (Object.values(sheet.animations)[0] as Texture[]);
+    // Only the first clean run cycle — the atlas packs several clips into
+    // `default`, and looping through all of them makes the chaser twitch.
+    const frames = all.slice(0, ENEMY.RUN_FRAME_COUNT);
     this.sprite = new AnimatedSprite(frames);
     this.sprite.anchor.set(0.5, 1);
     this.sprite.animationSpeed = ENEMY.ANIMATION_SPEED;

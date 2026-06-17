@@ -39,6 +39,10 @@ export const ENEMY = {
   SCALE_MULT: 1.3, // relative to PLAYER.SCALE
   GROUND_OFFSET: 20, // sits 20px above player ground line
   ANIMATION_SPEED: 0.4,
+  // The enemy atlas concatenates 5 separate walk/run clips (each with its own
+  // source size) under one `default` list. Playing all 44 frames makes the
+  // chaser jerk between gaits — use only the first complete, consistent cycle.
+  RUN_FRAME_COUNT: 10,
 } as const;
 
 export const OBSTACLE = {
