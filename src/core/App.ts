@@ -24,10 +24,17 @@ export class GameApp {
     await this.app.init({
       resizeTo: window,
       backgroundColor: bgColor,
+      // Cap DPR at 2 and DROP MSAA. This is a 2D sprite game (textures are already
+      // anti-aliased in their alpha), so antialias only added GPU fill-rate cost —
+      // the main source of jank on mobile. powerPreference asks for the fast GPU.
       resolution: Math.min(window.devicePixelRatio || 1, 2),
       autoDensity: true,
-      antialias: true,
+      antialias: false,
+      powerPreference: 'high-performance',
     });
+    // Cap at 60fps. Logic is deltaMS-scaled so motion is identical, but on
+    // 120Hz/ProMotion screens this halves GPU/CPU work and avoids thermal throttling.
+    this.app.ticker.maxFPS = 60;
     this.scene.sortableChildren = true;
     this.app.stage.addChild(this.scene);
 
@@ -40,6 +47,21 @@ export class GameApp {
     this.applyLayout();
     window.addEventListener('resize', this.handleResize);
     window.addEventListener('orientationchange', this.handleOrientation);
+
+    if (/[?&]fps\b/.test(location.search)) this.attachFpsMeter();
+  }
+
+  /** Optional on-screen FPS meter — open the playable with `?fps` to measure perf. */
+  private attachFpsMeter(): void {
+    const el = document.createElement('div');
+    el.style.cssText =
+      'position:fixed;top:4px;left:50%;transform:translateX(-50%);z-index:9999;' +
+      'background:rgba(0,0,0,.6);color:#0f0;font:bold 13px monospace;padding:2px 8px;' +
+      'border-radius:6px;pointer-events:none';
+    document.body.appendChild(el);
+    this.app.ticker.add(() => {
+      el.textContent = `${Math.round(this.app.ticker.FPS)} FPS`;
+    });
   }
 
   /** Fit height, center the 720-wide design column (reference setupResponsiveScaling). */
