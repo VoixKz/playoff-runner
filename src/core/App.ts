@@ -6,6 +6,9 @@ export interface Layout {
   /** Spawn-math width; swaps with orientation like the reference (`yt`): 720 / 1280. */
   workingWidth: number;
   isPortrait: boolean;
+  /** Design-space x of the screen's LEFT edge (≈0 portrait, strongly negative in
+   *  landscape). Entities cull relative to this so nothing vanishes mid-screen. */
+  visibleLeft: number;
 }
 
 /**
@@ -17,7 +20,7 @@ export interface Layout {
 export class GameApp {
   readonly app = new Application();
   readonly scene = new Container(); // scaled game world; HUD is separate DOM
-  layout: Layout = { scale: 1, workingWidth: DESIGN_WIDTH, isPortrait: true };
+  layout: Layout = { scale: 1, workingWidth: DESIGN_WIDTH, isPortrait: true, visibleLeft: 0 };
   private onResize?: () => void;
 
   async init(bgColor = BACKGROUND_COLOR): Promise<void> {
@@ -71,9 +74,17 @@ export class GameApp {
     const h = window.innerHeight;
     const isPortrait = h >= w;
     const scale = h / DESIGN_HEIGHT;
+    const offsetX = (w - DESIGN_WIDTH * scale) / 2;
     this.scene.scale.set(scale);
-    this.scene.position.set((w - DESIGN_WIDTH * scale) / 2, 0);
-    this.layout = { scale, workingWidth: isPortrait ? DESIGN_WIDTH : DESIGN_HEIGHT, isPortrait };
+    this.scene.position.set(offsetX, 0);
+    // screen-x 0 maps to design-x (-offsetX / scale): the true left edge for culling.
+    const visibleLeft = -offsetX / scale;
+    this.layout = {
+      scale,
+      workingWidth: isPortrait ? DESIGN_WIDTH : DESIGN_HEIGHT,
+      isPortrait,
+      visibleLeft,
+    };
     this.onResize?.();
   }
 

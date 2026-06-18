@@ -79,11 +79,6 @@ export const HITBOX = {
 
 export const MAX_HP = 3;
 
-/** Cull entities only once fully past the left edge of the WIDEST (landscape)
- *  viewport. The landscape left screen-edge maps to design-x ≈ -1133, so -1400
- *  gives margin. (Was -200 → props/enemies/cones vanished mid-screen in landscape.) */
-export const OFFSCREEN_LEFT = -1400;
-
 export const TUTORIAL_PAUSE_DISTANCE = 300; // px before tutorial enemy → pause
 
 /** Finish-line MeshRope cloth integrator config (reference `fe`). */

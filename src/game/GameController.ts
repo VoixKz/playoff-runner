@@ -11,7 +11,6 @@ import {
   HITBOX,
   MAX_HP,
   OBSTACLE,
-  OFFSCREEN_LEFT,
   ROPE,
   TUTORIAL_PAUSE_DISTANCE,
   WORLD,
@@ -280,11 +279,15 @@ export class GameController {
   }
 
   private cleanup(): void {
-    this.collectibles = this.filterOut(this.collectibles, (c) => c.collected || c.isOffScreen());
-    this.obstacles = this.filterOut(this.obstacles, (o) => o.isOffScreen());
-    this.enemies = this.filterOut(this.enemies, (e) => e.isOffScreen());
+    // Cull relative to the ACTUAL left edge of the viewport (design-space), so
+    // entities never vanish mid-screen on wide/landscape/large displays. 300px of
+    // margin keeps the widest sprite fully off-screen before it's destroyed.
+    const cullX = this.gameApp.layout.visibleLeft - 300;
+    this.collectibles = this.filterOut(this.collectibles, (c) => c.collected || c.isOffScreen(cullX));
+    this.obstacles = this.filterOut(this.obstacles, (o) => o.isOffScreen(cullX));
+    this.enemies = this.filterOut(this.enemies, (e) => e.isOffScreen(cullX));
     this.warnings = this.warnings.filter((w) => {
-      if (w.obstacle.destroyed || w.obstacle.x < OFFSCREEN_LEFT) {
+      if (w.obstacle.destroyed || w.obstacle.x < cullX) {
         w.node.destroy({ children: true });
         return false;
       }

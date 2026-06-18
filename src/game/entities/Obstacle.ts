@@ -1,5 +1,5 @@
 import { Container, Sprite, Texture } from 'pixi.js';
-import { DESIGN_HEIGHT, HITBOX, OBSTACLE, OFFSCREEN_LEFT, PLAYER, Z } from '../../config/constants';
+import { DESIGN_HEIGHT, HITBOX, OBSTACLE, PLAYER, Z } from '../../config/constants';
 import { insetRect, type Rect } from '../collision';
 
 /** Ground hazard (cone). Moves at world speed; pulsing glow. Optional EVADE warning. */
@@ -38,7 +38,7 @@ export class Obstacle extends Container {
     return insetRect({ x: this.x - w / 2, y: this.y - h, w, h }, HITBOX.OBSTACLE_SHRINK);
   }
 
-  isOffScreen(): boolean {
-    return this.x < OFFSCREEN_LEFT;
+  isOffScreen(cullX: number): boolean {
+    return this.x < cullX;
   }
 }
