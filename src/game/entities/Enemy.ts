@@ -39,4 +39,14 @@ export class Enemy extends Container {
   isOffScreen(cullX: number): boolean {
     return this.x < cullX;
   }
+
+  /** Freeze / resume the run cycle. The tutorial "stop-frame" only halts game
+   *  logic, but the AnimatedSprite advances on its own ticker — so without this
+   *  the chaser keeps running in place (twitches). The reference does the same. */
+  stopAnim(): void {
+    this.sprite.stop();
+  }
+  playAnim(): void {
+    this.sprite.play();
+  }
 }

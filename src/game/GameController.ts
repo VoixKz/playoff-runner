@@ -358,6 +358,7 @@ export class GameController {
     if (this.tutorialEnemy.x - this.player.x <= TUTORIAL_PAUSE_DISTANCE) {
       if (this.sm.transition('PAUSED')) {
         this.player.idle();
+        for (const e of this.enemies) e.stopAnim(); // true stop-frame, no twitch
         this.tutorial.show('jump');
       }
     }
@@ -367,6 +368,7 @@ export class GameController {
     if (!this.sm.transition('RUNNING')) return;
     this.jumpingEnabled = true;
     this.tutorial.hide();
+    for (const e of this.enemies) e.playAnim(); // resume the chaser's run cycle
     this.player.run();
     this.player.jump(); // auto first jump
     this.tutorialEnemy = undefined;
