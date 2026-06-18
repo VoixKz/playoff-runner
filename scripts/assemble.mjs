@@ -29,6 +29,26 @@ for (const m of map) {
   console.log(`${flag} dist/${m.dist.padEnd(12)} ${mb} MB  → docs/play/${m.play}`);
 }
 
+// Self-contained framed preview: inline the playable into the device-shell iframe
+// via `srcdoc` → ONE standalone HTML (device frames + game) that opens offline.
+const IFRAME = '<iframe id="game" title="playable" allow="autoplay"></iframe>';
+const shell = fs.readFileSync(path.resolve('docs/index.html'), 'utf8');
+const playable = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
+if (!shell.includes(IFRAME)) {
+  console.error('✗ device-shell iframe tag not found — cannot build preview.html');
+  ok = false;
+} else {
+  const esc = playable.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  // Build by concatenation + use a function replacer so '$' sequences in the
+  // minified game JS aren't interpreted as String.replace patterns ($&, $1, …).
+  const framed = '<iframe id="game" title="playable" allow="autoplay" srcdoc="' + esc + '"></iframe>';
+  const preview = shell.replace(IFRAME, () => framed);
+  fs.writeFileSync(path.join(dist, 'preview.html'), preview);
+  fs.writeFileSync(path.resolve('docs/preview.html'), preview);
+  const mb = (Buffer.byteLength(preview) / 1024 / 1024).toFixed(2);
+  console.log(`✓ dist/preview.html  ${mb} MB  (self-contained: device frames + game) → docs/preview.html`);
+}
+
 fs.rmSync(path.join(dist, 'original'), { recursive: true, force: true });
 // Keep Pages from running Jekyll over the build artifacts.
 fs.writeFileSync(path.resolve('docs/.nojekyll'), '');

@@ -158,7 +158,9 @@
   var frame = el('frame'), frameScale = el('frameScale'), game = el('game'), stage = el('stage');
 
   function post(m){ try{ if(game.contentWindow) game.contentWindow.postMessage(m,'*'); }catch(e){} }
-  function loadGame(){ game.src = './play/original.html'; }
+  // If the build inlined the playable into the iframe (srcdoc), keep it; otherwise
+  // load the separate file (online shell). This lets one self-contained file work offline.
+  function loadGame(){ if(!game.hasAttribute('srcdoc')) game.src = './play/original.html'; }
 
   function layout(){
     var d = DEVICES[state.device], land = state.orientation==='landscape';
@@ -209,7 +211,10 @@
     post({type:'mute', muted:state.muted});
   });
   // reload
-  el('reload').addEventListener('click', function(){ loadGame(); });
+  el('reload').addEventListener('click', function(){
+    if(game.hasAttribute('srcdoc')){ try{ game.contentWindow.location.reload(); }catch(e){} }
+    else loadGame();
+  });
 
   window.addEventListener('resize', layout);
   loadGame(); layout();
