@@ -79,6 +79,11 @@ export const HITBOX = {
 
 export const MAX_HP = 3;
 
+/** Cull entities only once fully past the left edge of the WIDEST (landscape)
+ *  viewport. The landscape left screen-edge maps to design-x ≈ -1133, so -1400
+ *  gives margin. (Was -200 → props/enemies/cones vanished mid-screen in landscape.) */
+export const OFFSCREEN_LEFT = -1400;
+
 export const TUTORIAL_PAUSE_DISTANCE = 300; // px before tutorial enemy → pause
 
 /** Finish-line MeshRope cloth integrator config (reference `fe`). */
@@ -101,9 +106,12 @@ export const ROPE = {
   RIGHT_OFFSET_X: 20,
   RIGHT_OFFSET_Y: -20,
   TAPE_BREAK_OFFSET: -300, // break when player.x >= finish.x - 300
-  LEFT_TAPE_ROTATION: 0.4,
-  RIGHT_TAPE_ROTATION: -2.5,
-  TAPE_SCALE_X: 1.8,
+  // Tuned for our full-width poles (50 / 670): each half runs from its pole down to
+  // the centre so the two meet in a clean shallow V, instead of overshooting into a
+  // crossed X (the reference's .4/-2.5/1.8 were for its narrow gate).
+  LEFT_TAPE_ROTATION: 0.22,
+  RIGHT_TAPE_ROTATION: 2.92,
+  TAPE_SCALE_X: 0.83,
   TAPE_SCALE_Y: 1,
 } as const;
 

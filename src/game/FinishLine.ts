@@ -29,7 +29,10 @@ export class FinishLine extends Container {
     this.zIndex = Z.FINISH_LINE;
     this.tapeTexture = tapeTexture;
     this.groundY = DESIGN_HEIGHT - PLAYER.GROUND_Y;
-    this.tapeY = this.groundY - 360;
+    this.tapeY = this.groundY - 232; // ~runner head height, so the tape is broken by the runner
+
+    // checkered finish strip on the road (behind poles/tape), like the reference
+    this.addChild(this.makeFloorPattern());
 
     const leftPoleX = 50;
     const rightPoleX = DESIGN_WIDTH - 50;
@@ -54,6 +57,24 @@ export class FinishLine extends Container {
     const g = new Graphics();
     g.rect(-6, this.tapeY - 20, 12, this.groundY - this.tapeY + 20).fill(0x4a3b6b);
     g.x = x;
+    return g;
+  }
+
+  /** Checkered finish strip painted on the road (reference `floorPattern`). */
+  private makeFloorPattern(): Graphics {
+    const g = new Graphics();
+    const sq = 38;
+    const cols = 18;
+    const rows = 2;
+    const bandW = cols * sq;
+    const x0 = DESIGN_WIDTH / 2 - bandW / 2;
+    const y0 = this.groundY - 80 - (rows * sq) / 2;
+    g.rect(x0, y0, bandW, rows * sq).fill(0xf2f2f2); // white base
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if ((r + c) % 2 === 0) g.rect(x0 + c * sq, y0 + r * sq, sq, sq).fill(0x141414);
+      }
+    }
     return g;
   }
 

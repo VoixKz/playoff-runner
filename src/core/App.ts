@@ -24,17 +24,18 @@ export class GameApp {
     await this.app.init({
       resizeTo: window,
       backgroundColor: bgColor,
-      // Cap DPR at 2 and DROP MSAA. This is a 2D sprite game (textures are already
-      // anti-aliased in their alpha), so antialias only added GPU fill-rate cost —
-      // the main source of jank on mobile. powerPreference asks for the fast GPU.
-      resolution: Math.min(window.devicePixelRatio || 1, 2),
+      // DROP MSAA (2D sprites are pre-anti-aliased in their alpha) and cap DPR at
+      // 1.5 — the dominant cost on phones is fragment/fill-rate, and 1.5x is still
+      // sharp while rendering ~44% fewer pixels than 2x. powerPreference picks the
+      // fast GPU.
+      resolution: Math.min(window.devicePixelRatio || 1, 1.5),
       autoDensity: true,
       antialias: false,
       powerPreference: 'high-performance',
     });
-    // Cap at 60fps. Logic is deltaMS-scaled so motion is identical, but on
-    // 120Hz/ProMotion screens this halves GPU/CPU work and avoids thermal throttling.
-    this.app.ticker.maxFPS = 60;
+    // No maxFPS cap: capping AT the display's refresh rate (60) makes Pixi skip
+    // frames on the 16.6ms boundary → periodic stutter, most visible on the fast
+    // chaser. Native vsync pacing is smooth; motion is deltaMS-scaled regardless.
     this.scene.sortableChildren = true;
     this.app.stage.addChild(this.scene);
 

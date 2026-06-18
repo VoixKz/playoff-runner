@@ -1,5 +1,5 @@
 import { Container, Sprite, Texture } from 'pixi.js';
-import { COLLECTIBLE, Z } from '../../config/constants';
+import { COLLECTIBLE, OFFSCREEN_LEFT, Z } from '../../config/constants';
 
 export type CollectibleKind = 'dollar' | 'paypal';
 
@@ -37,6 +37,6 @@ export class Collectible extends Container {
   }
 
   isOffScreen(): boolean {
-    return this.x < -200;
+    return this.x < OFFSCREEN_LEFT;
   }
 }

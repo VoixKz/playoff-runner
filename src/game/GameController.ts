@@ -11,6 +11,7 @@ import {
   HITBOX,
   MAX_HP,
   OBSTACLE,
+  OFFSCREEN_LEFT,
   ROPE,
   TUTORIAL_PAUSE_DISTANCE,
   WORLD,
@@ -283,7 +284,7 @@ export class GameController {
     this.obstacles = this.filterOut(this.obstacles, (o) => o.isOffScreen());
     this.enemies = this.filterOut(this.enemies, (e) => e.isOffScreen());
     this.warnings = this.warnings.filter((w) => {
-      if (w.obstacle.destroyed || w.obstacle.x < -200) {
+      if (w.obstacle.destroyed || w.obstacle.x < OFFSCREEN_LEFT) {
         w.node.destroy({ children: true });
         return false;
       }

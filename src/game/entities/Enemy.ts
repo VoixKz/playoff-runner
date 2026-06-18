@@ -1,5 +1,5 @@
 import { AnimatedSprite, Container, Spritesheet, Texture } from 'pixi.js';
-import { DESIGN_HEIGHT, ENEMY, HITBOX, PLAYER, Z } from '../../config/constants';
+import { DESIGN_HEIGHT, ENEMY, HITBOX, OFFSCREEN_LEFT, PLAYER, Z } from '../../config/constants';
 import { shrinkRect, type Rect } from '../collision';
 
 /** Chaser: moves left faster than the world (worldSpeed + CHASE_SPEED), faces the player. */
@@ -37,6 +37,6 @@ export class Enemy extends Container {
   }
 
   isOffScreen(): boolean {
-    return this.x < -200;
+    return this.x < OFFSCREEN_LEFT;
   }
 }
