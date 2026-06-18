@@ -45,17 +45,6 @@
   color: var(--counter-color, #003087);
   white-space: nowrap;
 }
-/* Solana's reward card is a full graphic with no slot — keep the amount beside it. */
-.money-badge.solana {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.money-badge.solana #score-display {
-  position: static;
-  inset: auto;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
-}
 #score-display.pulse {
   animation: score-pulse 0.3s ease;
 }

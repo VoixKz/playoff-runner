@@ -111,7 +111,7 @@ export const ROPE = {
 } as const;
 
 export const CONFETTI = {
-  PARTICLE_COUNT: 50, // per side
+  PARTICLE_COUNT: 28, // per side — enough for a lively burst without tanking FPS at the finish
   LIFETIME: 5000,
   SCALE_MIN: 0.8,
   SCALE_MAX: 1.5,

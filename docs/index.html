@@ -39,11 +39,6 @@
   .pause-overlay svg { width:52px; height:52px; opacity:.8; }
   .pause-overlay .t { font-size:14px; } .pause-overlay .d { font-size:12px; color:#8b8b99; }
 
-  /* skin switch — top-right, subtle */
-  .skin { position:fixed; top:18px; right:18px; display:inline-flex; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:9px; overflow:hidden; z-index:20; }
-  .skin button { background:transparent; color:rgba(255,255,255,.6); border:0; padding:7px 13px; font:600 13px inherit; cursor:pointer; }
-  .skin button.on { background:linear-gradient(90deg,var(--accent),#7b2ff7); color:#fff; }
-
   /* Playbox-style centered icon toolbar */
   .toolbar {
     position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
@@ -80,11 +75,6 @@
 </style>
 </head>
 <body>
-  <div class="skin" id="skin">
-    <button data-skin="original" class="on">Original</button>
-    <button data-skin="solana">Solana &#11088;</button>
-  </div>
-
   <div class="stage" id="stage">
     <div class="frame-scale" id="frameScale">
       <div class="frame" id="frame">
@@ -163,12 +153,12 @@
   var ICON_EYE = '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>';
   var ICON_EYE_OFF = '<path d="M3 3l18 18M10.6 5.2A10.6 10.6 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3.3 4M6.6 6.6A18 18 0 0 0 2 12s3.5 7 10 7a10.6 10.6 0 0 0 3.4-.6"/>';
 
-  var state = { device:'iphone-16-pro-max', orientation:'portrait', skin:'original', muted:false, paused:false };
+  var state = { device:'iphone-16-pro-max', orientation:'portrait', muted:false, paused:false };
   var el = function(id){ return document.getElementById(id); };
   var frame = el('frame'), frameScale = el('frameScale'), game = el('game'), stage = el('stage');
 
   function post(m){ try{ if(game.contentWindow) game.contentWindow.postMessage(m,'*'); }catch(e){} }
-  function loadSkin(){ game.src = './play/' + state.skin + '.html'; }
+  function loadGame(){ game.src = './play/original.html'; }
 
   function layout(){
     var d = DEVICES[state.device], land = state.orientation==='landscape';
@@ -219,18 +209,10 @@
     post({type:'mute', muted:state.muted});
   });
   // reload
-  el('reload').addEventListener('click', function(){ loadSkin(); });
-  // skin
-  el('skin').addEventListener('click', function(e){
-    var b = e.target.closest('button'); if(!b) return;
-    state.skin = b.dataset.skin;
-    var kids = el('skin').children;
-    for (var i=0;i<kids.length;i++) kids[i].classList.toggle('on', kids[i]===b);
-    loadSkin();
-  });
+  el('reload').addEventListener('click', function(){ loadGame(); });
 
   window.addEventListener('resize', layout);
-  loadSkin(); layout();
+  loadGame(); layout();
 </script>
 </body>
 </html>

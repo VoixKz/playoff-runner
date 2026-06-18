@@ -9,7 +9,6 @@ fs.mkdirSync(docsPlay, { recursive: true });
 
 const map = [
   { src: 'original/index.html', dist: 'index.html', play: 'original.html' },
-  { src: 'solana/index.html', dist: 'solana.html', play: 'solana.html' },
 ];
 
 const MAX = 5 * 1024 * 1024;
@@ -30,9 +29,7 @@ for (const m of map) {
   console.log(`${flag} dist/${m.dist.padEnd(12)} ${mb} MB  → docs/play/${m.play}`);
 }
 
-for (const sub of ['original', 'solana']) {
-  fs.rmSync(path.join(dist, sub), { recursive: true, force: true });
-}
+fs.rmSync(path.join(dist, 'original'), { recursive: true, force: true });
 // Keep Pages from running Jekyll over the build artifacts.
 fs.writeFileSync(path.resolve('docs/.nojekyll'), '');
 

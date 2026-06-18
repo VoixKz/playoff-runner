@@ -64,21 +64,12 @@ export interface SkinCopy {
   praises: string[];
 }
 
-export interface PlayerRecolor {
-  hue?: number;
-  saturate?: number;
-  brightness?: number;
-  contrast?: number;
-}
-
 export interface Skin {
-  id: 'original' | 'solana';
+  id: 'original';
   assets: SkinAssets;
   audio: SkinAudio;
   theme: SkinTheme;
   copy: SkinCopy;
-  /** Optional stylized recolor of the player sprite (used by the Solana reskin). */
-  playerRecolor?: PlayerRecolor;
   /** Store / landing URLs for the CTA. */
   store: { google: string; apple: string };
 }

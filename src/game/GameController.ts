@@ -1,4 +1,4 @@
-import { Container, Graphics, Spritesheet, Text, TextStyle, Texture } from 'pixi.js';
+import { Container, Graphics, MeshRope, Point, Spritesheet, Text, TextStyle, Texture } from 'pixi.js';
 import type { GameApp } from '../core/App';
 import type { AudioManager } from '../core/audio/AudioManager';
 import type { PlayableSDK } from '../core/sdk/PlayableSDK';
@@ -112,7 +112,6 @@ export class GameController {
     scene.addChild(this.parallax);
 
     this.player = new Player(playerSheet);
-    if (this.skin.playerRecolor) this.player.applyRecolor(this.skin.playerRecolor);
     this.player.onJump = () => this.audio.play('jump');
     scene.addChild(this.player);
 
@@ -130,8 +129,18 @@ export class GameController {
     this.layoutWorld();
     this.gameApp.ticker.add((ticker) => this.update(Math.min(ticker.deltaMS, 50)));
 
+    this.warmMeshShader();
     this.sm.transition('INTRO');
     this.tutorial.show('start');
+  }
+
+  /** Compile the MeshRope shader during INTRO (off the critical path) so breaking
+   *  the finish tape — which swaps sprites for MeshRopes — never hitches. */
+  private warmMeshShader(): void {
+    const warm = new MeshRope({ texture: this.tex.finishTape, points: [new Point(0, 0), new Point(10, 0)] });
+    warm.alpha = 0.001;
+    this.gameApp.scene.addChild(warm);
+    setTimeout(() => warm.destroy(), 400);
   }
 
   /** Swap the footer banner for the current orientation (player stays at 0.18·W). */

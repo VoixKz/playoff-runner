@@ -1,6 +1,5 @@
-import { AnimatedSprite, ColorMatrixFilter, Container, Spritesheet, Texture } from 'pixi.js';
+import { AnimatedSprite, Container, Spritesheet, Texture } from 'pixi.js';
 import { DESIGN_WIDTH, DESIGN_HEIGHT, PLAYER, Z, type PlayerAnim } from '../config/constants';
-import type { PlayerRecolor } from '../config/skins/types';
 import type { Rect } from './collision';
 
 /** The runner: pinned in X, one vertical DOF (sine-arc jump), i-frame blink on hit. */
@@ -56,16 +55,6 @@ export class Player extends Container {
       this.sprite.animationSpeed = PLAYER.ANIMATION_SPEED;
     }
     this.sprite.gotoAndPlay(0);
-  }
-
-  /** Stylized recolor of the runner (Solana reskin). */
-  applyRecolor(cfg: PlayerRecolor): void {
-    const f = new ColorMatrixFilter();
-    if (cfg.brightness != null) f.brightness(cfg.brightness, false);
-    if (cfg.saturate != null) f.saturate(cfg.saturate, true);
-    if (cfg.hue != null) f.hue(cfg.hue, true);
-    if (cfg.contrast != null) f.contrast(cfg.contrast, true);
-    this.sprite.filters = [f];
   }
 
   idle(): void {

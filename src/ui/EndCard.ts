@@ -22,12 +22,12 @@ export class EndCard {
     const lights = el('div', 'lights-effect');
     lights.style.backgroundImage = `url(${this.skin.assets.lightRays})`;
     const card = el('div', 'reward-card');
-    card.style.setProperty('--card-border', this.skin.id === 'solana' ? '#9945FF' : '#003087');
+    card.style.setProperty('--card-border', '#003087');
     const logo = document.createElement('img');
     logo.className = 'reward-logo';
-    logo.src = this.skin.id === 'solana' ? this.skin.assets.dollar : this.skin.assets.paypalCard;
+    logo.src = this.skin.assets.paypalCard;
     const amountEl = el('div', 'end-amount', `${this.skin.theme.currency}0.00`);
-    amountEl.style.setProperty('--amount-color', this.skin.id === 'solana' ? '#14a85b' : '#0b0b0b');
+    amountEl.style.setProperty('--amount-color', '#0b0b0b');
     card.append(logo, amountEl); // logo on top, amount below
     wrapper.append(lights, card);
 
