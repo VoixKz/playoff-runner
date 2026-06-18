@@ -25,7 +25,9 @@ export class GameApp {
 
   async init(bgColor = BACKGROUND_COLOR): Promise<void> {
     await this.app.init({
-      resizeTo: window,
+      // NOTE: no `resizeTo` — it defers the renderer resize to the next render tick,
+      // which desyncs from applyLayout() and squishes everything for a frame on an
+      // abrupt orientation/size change. applyLayout() resizes the renderer itself.
       backgroundColor: bgColor,
       // DROP MSAA (2D sprites are pre-anti-aliased in their alpha) and cap DPR at
       // 1.5 — the dominant cost on phones is fragment/fill-rate, and 1.5x is still
@@ -72,6 +74,9 @@ export class GameApp {
   applyLayout(): void {
     const w = window.innerWidth;
     const h = window.innerHeight;
+    // Resize the renderer SYNCHRONOUSLY (same call as the scene rescale) so the
+    // canvas and the world always change size together — no one-frame squish.
+    if (this.app.renderer) this.app.renderer.resize(w, h);
     const isPortrait = h >= w;
     const scale = h / DESIGN_HEIGHT;
     const offsetX = (w - DESIGN_WIDTH * scale) / 2;
