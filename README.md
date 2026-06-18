@@ -1,9 +1,8 @@
 # Playoff Runner
 
-PixiJS clone of the Playbox **"Playoff" runner** playable ad — one self-contained HTML, ≤5 MB.
+PixiJS clone of the Playbox **"Playoff" runner**
 
 - **Live:** https://voixkz.github.io/playoff-runner/
-- **Reference:** https://playbox.play.plbx.ai/playoff/runner
 
 ```bash
 npm install
