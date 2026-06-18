@@ -89,7 +89,6 @@ const skin: Skin = {
     loseTitle: "You didn't make it!",
     loseSubtitle: 'Try again on the app!',
     cta: 'Install and Earn',
-    reward: 'Choose your reward!',
     countdown: 'Next payment in one minute',
     disclaimer:
       'The actual payment depends on playing and interacting with the app.',

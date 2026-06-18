@@ -1,6 +1,6 @@
 import { Container, Graphics, MeshRope, Point, Sprite, Texture } from 'pixi.js';
 import { DESIGN_HEIGHT, DESIGN_WIDTH, PLAYER, ROPE, Z } from '../config/constants';
-import { ropeSettled, stepRope, type RopePoint } from './rope';
+import { makeRopePoints, ropeSettled, stepRope, type RopePoint } from './rope';
 
 interface RopeHalf {
   points: RopePoint[];
@@ -87,16 +87,10 @@ export class FinishLine extends Container {
   private buildHalf(tape: Sprite, offX: number, offY: number): RopeHalf {
     const length = this.tapeTexture.width * tape.scale.x * ROPE.LENGTH_FACTOR;
     const spacing = length / (ROPE.SEGMENTS - 1);
-    const dx = Math.cos(tape.rotation) * spacing;
-    const dy = Math.sin(tape.rotation) * spacing;
-    const points: RopePoint[] = [];
-    const meshPoints: Point[] = [];
-    for (let i = 0; i < ROPE.SEGMENTS; i++) {
-      const px = tape.x + dx * i + offX;
-      const py = tape.y + dy * i + offY;
-      points.push({ x: px, y: py, vx: 0, vy: 0 });
-      meshPoints.push(new Point(px, py));
-    }
+    const start = { x: tape.x + offX, y: tape.y + offY };
+    const dir = { x: Math.cos(tape.rotation), y: Math.sin(tape.rotation) };
+    const points = makeRopePoints(start, dir, ROPE.SEGMENTS, spacing);
+    const meshPoints = points.map((p) => new Point(p.x, p.y));
     const mesh = new MeshRope({ texture: this.tapeTexture, points: meshPoints });
     this.addChild(mesh);
     return { points, meshPoints, mesh };

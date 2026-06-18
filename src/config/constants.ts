@@ -1,5 +1,5 @@
-// All gameplay constants, lifted 1:1 from the reverse-engineered reference
-// (see docs/reference-spec.md). Single source of truth — do not scatter magic numbers.
+// All gameplay constants, lifted 1:1 from the reverse-engineered reference.
+// Single source of truth — do not scatter magic numbers.
 
 /** Portrait design space. The stage is scaled to fit the screen height. */
 export const DESIGN_WIDTH = 720;
@@ -26,11 +26,6 @@ export const WORLD = {
   DECELERATION_RATE: 0.9, // per-frame multiplier once finish reached
   MIN_SPEED: 10, // below this, snap to 0 → win
   LAMP_SPACING: 800,
-  TREE_MIN_SPACING: 300,
-  TREE_MAX_SPACING: 500,
-  BUSH_MIN_SPACING: 250,
-  BUSH_MAX_SPACING: 450,
-  SCREEN_BUFFER: 1200,
   BG_TILE_COUNT: 6,
 } as const;
 

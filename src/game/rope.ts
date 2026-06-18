@@ -12,8 +12,8 @@ export interface RopePoint {
 export function makeRopePoints(
   start: { x: number; y: number },
   dir: { x: number; y: number },
-  segments = ROPE.SEGMENTS,
-  spacing = ROPE.SEGMENT_DISTANCE,
+  segments: number = ROPE.SEGMENTS,
+  spacing: number = ROPE.SEGMENT_DISTANCE,
 ): RopePoint[] {
   // Normalize direction so points are evenly spaced along the tape.
   const len = Math.hypot(dir.x, dir.y) || 1;

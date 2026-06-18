@@ -109,7 +109,7 @@ export class GameController {
     this.tex = { dollar, paypal, finishTape, finishFloor, obstacle, obstacleGlow };
 
     const scene = this.gameApp.scene;
-    this.parallax = new Parallax(bg, trees, bushes, lamp, this.skin.theme.propTint);
+    this.parallax = new Parallax(bg, trees, bushes, lamp);
     scene.addChild(this.parallax);
 
     this.player = new Player(playerSheet);

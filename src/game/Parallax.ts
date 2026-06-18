@@ -22,7 +22,6 @@ class PropRow extends Container {
     y: number,
     anchorY: number,
     z: number,
-    tint?: number,
   ) {
     super();
     this.zIndex = z;
@@ -34,7 +33,6 @@ class PropRow extends Container {
       s.scale.set(scaleVal);
       s.x = COVER_START + i * spacing;
       s.y = y;
-      if (tint !== undefined) s.tint = tint;
       this.items.push(s);
       this.addChild(s);
     }
@@ -57,7 +55,7 @@ export class Parallax extends Container {
   private tileWidth = 0;
   private rows: PropRow[] = [];
 
-  constructor(bg: Texture, trees: Texture[], bushes: Texture[], lamp: Texture, propTint?: number) {
+  constructor(bg: Texture, trees: Texture[], bushes: Texture[], lamp: Texture) {
     super();
     this.sortableChildren = true;
 
@@ -86,11 +84,11 @@ export class Parallax extends Container {
 
     const roadY = DESIGN_HEIGHT - PLAYER.GROUND_Y; // 1000
     // trees: big, hang from the top
-    this.rows.push(new PropRow(trees, 420, 1.81, 0, 0, Z.MID_BACKGROUND, propTint));
+    this.rows.push(new PropRow(trees, 420, 1.81, 0, 0, Z.MID_BACKGROUND));
     // lamps: hang from the top, y=50
-    this.rows.push(new PropRow([lamp], WORLD.LAMP_SPACING, 1.8, 50, 0, Z.NEAR_BACKGROUND, propTint));
+    this.rows.push(new PropRow([lamp], WORLD.LAMP_SPACING, 1.8, 50, 0, Z.NEAR_BACKGROUND));
     // bushes: sit at the horizon line (above the road)
-    this.rows.push(new PropRow(bushes, 300, 0.52, roadY - 305, 1, Z.NEAR_BACKGROUND, propTint));
+    this.rows.push(new PropRow(bushes, 300, 0.52, roadY - 305, 1, Z.NEAR_BACKGROUND));
     for (const r of this.rows) this.addChild(r);
   }
 

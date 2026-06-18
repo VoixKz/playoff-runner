@@ -2,7 +2,6 @@ import { Application, Container } from 'pixi.js';
 import { BACKGROUND_COLOR, DESIGN_WIDTH, DESIGN_HEIGHT } from '../config/constants';
 
 export interface Layout {
-  scale: number;
   /** Spawn-math width; swaps with orientation like the reference (`yt`): 720 / 1280. */
   workingWidth: number;
   isPortrait: boolean;
@@ -20,7 +19,7 @@ export interface Layout {
 export class GameApp {
   readonly app = new Application();
   readonly scene = new Container(); // scaled game world; HUD is separate DOM
-  layout: Layout = { scale: 1, workingWidth: DESIGN_WIDTH, isPortrait: true, visibleLeft: 0 };
+  layout: Layout = { workingWidth: DESIGN_WIDTH, isPortrait: true, visibleLeft: 0 };
   private onResize?: () => void;
 
   async init(bgColor = BACKGROUND_COLOR): Promise<void> {
@@ -85,7 +84,6 @@ export class GameApp {
     // screen-x 0 maps to design-x (-offsetX / scale): the true left edge for culling.
     const visibleLeft = -offsetX / scale;
     this.layout = {
-      scale,
       workingWidth: isPortrait ? DESIGN_WIDTH : DESIGN_HEIGHT,
       isPortrait,
       visibleLeft,
