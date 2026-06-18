@@ -89,12 +89,13 @@ export class GameController {
     ]);
     this.enemySheet = enemySheet;
 
-    const [bg, dollar, paypal, finishTape, obstacle, obstacleGlow, lamp, ...rest] =
+    const [bg, dollar, paypal, finishTape, finishFloor, obstacle, obstacleGlow, lamp, ...rest] =
       await loadTextures([
         a.background,
         a.dollar,
         a.paypalCard,
         a.finishTape,
+        a.finishFloor,
         a.obstacle,
         a.obstacleGlow,
         a.lamp,
@@ -105,7 +106,7 @@ export class GameController {
     const trees = rest.slice(0, a.trees.length);
     const bushes = rest.slice(a.trees.length, a.trees.length + a.bushes.length);
     const confetti = rest.slice(a.trees.length + a.bushes.length);
-    this.tex = { dollar, paypal, finishTape, obstacle, obstacleGlow };
+    this.tex = { dollar, paypal, finishTape, finishFloor, obstacle, obstacleGlow };
 
     const scene = this.gameApp.scene;
     this.parallax = new Parallax(bg, trees, bushes, lamp, this.skin.theme.propTint);
@@ -242,7 +243,7 @@ export class GameController {
       this.enemies.push(e);
       if (entry.pauseForTutorial) this.tutorialEnemy = e;
     } else if (entry.type === 'finish') {
-      this.finishLine = new FinishLine(this.tex.finishTape);
+      this.finishLine = new FinishLine(this.tex.finishTape, this.tex.finishFloor);
       this.finishLine.x = spawnX;
       scene.addChild(this.finishLine);
       this.finishSpawned = true;

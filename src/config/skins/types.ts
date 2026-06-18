@@ -13,6 +13,7 @@ export interface SkinAssets {
   dollar: string; // primary collectible (60%)
   paypalCard: string; // secondary collectible (40%)
   finishTape: string; // checker tape texture → MeshRope
+  finishFloor: string; // perspective checkered finish zone painted on the road
   obstacle: string;
   obstacleGlow: string;
   trees: string[];

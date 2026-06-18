@@ -9,6 +9,7 @@ import enemyAtlas from '../../../assets/original/enemy.atlas.json';
 import dollar from '../../../assets/original/dollar.png';
 import paypalCard from '../../../assets/original/paypal-logo.webp';
 import finishTape from '../../../assets/original/finish-tape.png';
+import finishFloor from '../../../assets/original/finish-floor.png';
 import obstacle from '../../../assets/original/obstacle-cone.webp';
 import obstacleGlow from '../../../assets/original/obstacle-glow.webp';
 import tree1 from '../../../assets/original/tree-1.png';
@@ -48,6 +49,7 @@ const skin: Skin = {
     dollar,
     paypalCard,
     finishTape,
+    finishFloor,
     obstacle,
     obstacleGlow,
     trees: [tree1, tree2],

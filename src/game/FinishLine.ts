@@ -21,13 +21,15 @@ export class FinishLine extends Container {
   private broken = false;
   private settled = false;
   private readonly tapeTexture: Texture;
+  private readonly floorTexture: Texture;
   private readonly groundY: number;
   private readonly tapeY: number;
 
-  constructor(tapeTexture: Texture) {
+  constructor(tapeTexture: Texture, floorTexture: Texture) {
     super();
     this.zIndex = Z.FINISH_LINE;
     this.tapeTexture = tapeTexture;
+    this.floorTexture = floorTexture;
     this.groundY = DESIGN_HEIGHT - PLAYER.GROUND_Y;
     this.tapeY = this.groundY - 232; // ~runner head height, so the tape is broken by the runner
 
@@ -60,22 +62,12 @@ export class FinishLine extends Container {
     return g;
   }
 
-  /** Checkered finish strip painted on the road (reference `floorPattern`). */
-  private makeFloorPattern(): Graphics {
-    const g = new Graphics();
-    const sq = 38;
-    const cols = 18;
-    const rows = 2;
-    const bandW = cols * sq;
-    const x0 = DESIGN_WIDTH / 2 - bandW / 2;
-    const y0 = this.groundY - 80 - (rows * sq) / 2;
-    g.rect(x0, y0, bandW, rows * sq).fill(0xf2f2f2); // white base
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if ((r + c) % 2 === 0) g.rect(x0 + c * sq, y0 + r * sq, sq, sq).fill(0x141414);
-      }
-    }
-    return g;
+  /** Perspective checkered finish zone painted on the road (reference `floorPattern`). */
+  private makeFloorPattern(): Sprite {
+    const floor = new Sprite(this.floorTexture);
+    floor.anchor.set(0.5, 0.55);
+    floor.position.set(DESIGN_WIDTH / 2, this.groundY - 20);
+    return floor;
   }
 
   get isBroken(): boolean {
