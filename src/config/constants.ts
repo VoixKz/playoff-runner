@@ -90,7 +90,7 @@ export const ROPE = {
   MIN_ANIMATION_TIME: 1,
   SEGMENT_DISTANCE: 10,
   CONSTRAINT_STIFFNESS: 0.5,
-  TAPE_BREAK_OFFSET: -300, // break when player.x >= finish.x - 300
+  TAPE_BREAK_OFFSET: 50, // break when the runner reaches the tape (left pole = finish.x + 50)
 } as const;
 
 export const CONFETTI = {
