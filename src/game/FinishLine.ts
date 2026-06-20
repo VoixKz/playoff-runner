@@ -9,13 +9,13 @@ interface RopeHalf {
 }
 
 /**
- * Finish gate: two poles + a checker tape. While running the tape is a pair of
- * rotated Sprites; when the runner hits it, breakTape() swaps each half for a
- * PixiJS MeshRope driven by the verlet integrator (rope.ts) so it falls like cloth.
+ * Finish gate: two poles + a checker tape. While running the tape is ONE taut
+ * ribbon stretched between the poles (intact). When the runner crosses, breakTape()
+ * hides it and hangs a PixiJS MeshRope from each pole, driven by the verlet
+ * integrator (rope.ts) so each half snaps and falls like cloth.
  */
 export class FinishLine extends Container {
-  private leftTape: Sprite;
-  private rightTape: Sprite;
+  private tape: Sprite;
   private halves: RopeHalf[] = [];
   private animationTime = 0;
   private broken = false;
@@ -24,6 +24,8 @@ export class FinishLine extends Container {
   private readonly floorTexture: Texture;
   private readonly groundY: number;
   private readonly tapeY: number;
+  private readonly leftPoleX = 50;
+  private readonly rightPoleX = DESIGN_WIDTH - 50;
 
   constructor(tapeTexture: Texture, floorTexture: Texture) {
     super();
@@ -31,28 +33,18 @@ export class FinishLine extends Container {
     this.tapeTexture = tapeTexture;
     this.floorTexture = floorTexture;
     this.groundY = DESIGN_HEIGHT - PLAYER.GROUND_Y;
-    this.tapeY = this.groundY - 232; // ~runner head height, so the tape is broken by the runner
+    this.tapeY = this.groundY - 232; // ~runner head height, so the runner breaks it
 
-    // checkered finish strip on the road (behind poles/tape), like the reference
+    // checkered finish strip on the road (behind poles/tape)
     this.addChild(this.makeFloorPattern());
+    this.addChild(this.makePole(this.leftPoleX), this.makePole(this.rightPoleX));
 
-    const leftPoleX = 50;
-    const rightPoleX = DESIGN_WIDTH - 50;
-    this.addChild(this.makePole(leftPoleX), this.makePole(rightPoleX));
-
-    this.leftTape = new Sprite(tapeTexture);
-    this.leftTape.anchor.set(0, 0);
-    this.leftTape.scale.set(ROPE.TAPE_SCALE_X, ROPE.TAPE_SCALE_Y);
-    this.leftTape.rotation = ROPE.LEFT_TAPE_ROTATION;
-    this.leftTape.position.set(leftPoleX, this.tapeY);
-
-    this.rightTape = new Sprite(tapeTexture);
-    this.rightTape.anchor.set(0, 0);
-    this.rightTape.scale.set(ROPE.TAPE_SCALE_X, ROPE.TAPE_SCALE_Y);
-    this.rightTape.rotation = ROPE.RIGHT_TAPE_ROTATION;
-    this.rightTape.position.set(rightPoleX, this.tapeY);
-
-    this.addChild(this.leftTape, this.rightTape);
+    // ONE continuous taut ribbon stretched pole-to-pole — intact until broken.
+    this.tape = new Sprite(tapeTexture);
+    this.tape.anchor.set(0, 0.5);
+    this.tape.position.set(this.leftPoleX, this.tapeY);
+    this.tape.width = this.rightPoleX - this.leftPoleX;
+    this.addChild(this.tape);
   }
 
   private makePole(x: number): Graphics {
@@ -74,22 +66,19 @@ export class FinishLine extends Container {
     return this.broken;
   }
 
-  /** Swap each tape sprite for a MeshRope whose control points the integrator drives. */
+  /** Snap the tape: hide the ribbon, hang a falling MeshRope from each pole. */
   breakTape(): void {
     if (this.broken) return;
     this.broken = true;
-    this.leftTape.visible = false;
-    this.rightTape.visible = false;
-    this.halves.push(this.buildHalf(this.leftTape, ROPE.LEFT_OFFSET_X, ROPE.LEFT_OFFSET_Y));
-    this.halves.push(this.buildHalf(this.rightTape, ROPE.RIGHT_OFFSET_X, ROPE.RIGHT_OFFSET_Y));
+    this.tape.visible = false;
+    this.halves.push(this.buildHalf(this.leftPoleX, 1)); // pinned at left pole, falls toward centre
+    this.halves.push(this.buildHalf(this.rightPoleX, -1)); // pinned at right pole
   }
 
-  private buildHalf(tape: Sprite, offX: number, offY: number): RopeHalf {
-    const length = this.tapeTexture.width * tape.scale.x * ROPE.LENGTH_FACTOR;
+  private buildHalf(poleX: number, dirX: number): RopeHalf {
+    const length = (this.rightPoleX - this.leftPoleX) / 2; // pole → centre
     const spacing = length / (ROPE.SEGMENTS - 1);
-    const start = { x: tape.x + offX, y: tape.y + offY };
-    const dir = { x: Math.cos(tape.rotation), y: Math.sin(tape.rotation) };
-    const points = makeRopePoints(start, dir, ROPE.SEGMENTS, spacing);
+    const points = makeRopePoints({ x: poleX, y: this.tapeY }, { x: dirX, y: 0 }, ROPE.SEGMENTS, spacing);
     const meshPoints = points.map((p) => new Point(p.x, p.y));
     const mesh = new MeshRope({ texture: this.tapeTexture, points: meshPoints });
     this.addChild(mesh);

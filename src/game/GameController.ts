@@ -392,7 +392,9 @@ export class GameController {
   private startDeceleration(): void {
     this.isDecelerating = true;
     this.finishLine?.breakTape();
-    this.overlay = new Graphics().rect(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT).fill(0x000000);
+    // Span far beyond the 720 design column so the dim reaches the screen edges in
+    // any aspect (otherwise the centre is darker than the sides on the win screen).
+    this.overlay = new Graphics().rect(-2400, 0, DESIGN_WIDTH + 4800, DESIGN_HEIGHT).fill(0x000000);
     this.overlay.alpha = 0;
     this.overlay.zIndex = Z.OVERLAY;
     this.gameApp.scene.addChild(this.overlay);

@@ -79,7 +79,6 @@ export const TUTORIAL_PAUSE_DISTANCE = 300; // px before tutorial enemy → paus
 /** Finish-line MeshRope cloth integrator config (reference `fe`). */
 export const ROPE = {
   SEGMENTS: 10,
-  LENGTH_FACTOR: 0.3, // only ~30% of tape length dangles
   GRAVITY: 0.3,
   DAMPING: 0.95,
   WAVE_SPEED: 0.01,
@@ -91,18 +90,7 @@ export const ROPE = {
   MIN_ANIMATION_TIME: 1,
   SEGMENT_DISTANCE: 10,
   CONSTRAINT_STIFFNESS: 0.5,
-  LEFT_OFFSET_X: 0,
-  LEFT_OFFSET_Y: 0,
-  RIGHT_OFFSET_X: 20,
-  RIGHT_OFFSET_Y: -20,
   TAPE_BREAK_OFFSET: -300, // break when player.x >= finish.x - 300
-  // Tuned for our full-width poles (50 / 670): each half runs from its pole down to
-  // the centre so the two meet in a clean shallow V, instead of overshooting into a
-  // crossed X (the reference's .4/-2.5/1.8 were for its narrow gate).
-  LEFT_TAPE_ROTATION: 0.22,
-  RIGHT_TAPE_ROTATION: 2.92,
-  TAPE_SCALE_X: 0.83,
-  TAPE_SCALE_Y: 1,
 } as const;
 
 export const CONFETTI = {
