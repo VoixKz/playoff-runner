@@ -147,7 +147,7 @@ export const FINISH = {
 
   // ── 4 · BREAK TIMING (when the runner tears through the tape) ───────────────
   //   The tape snaps when the LEFT pole reaches the player. Keep ≈ LEFT_POLE_TOP_X.
-  BREAK_OFFSET: 120,
+  BREAK_OFFSET: 100,
 } as const;
 
 export const CONFETTI = {
