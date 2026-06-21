@@ -8,10 +8,10 @@ import {
   CONFETTI,
   DESIGN_HEIGHT,
   DESIGN_WIDTH,
+  FINISH,
   HITBOX,
   MAX_HP,
   OBSTACLE,
-  ROPE,
   TUTORIAL_PAUSE_DISTANCE,
   WORLD,
   Z,
@@ -89,13 +89,11 @@ export class GameController {
     ]);
     this.enemySheet = enemySheet;
 
-    const [bg, dollar, paypal, finishTape, finishFloor, obstacle, obstacleGlow, lamp, ...rest] =
+    const [bg, dollar, paypal, obstacle, obstacleGlow, lamp, ...rest] =
       await loadTextures([
         a.background,
         a.dollar,
         a.paypalCard,
-        a.finishTape,
-        a.finishFloor,
         a.obstacle,
         a.obstacleGlow,
         a.lamp,
@@ -106,7 +104,7 @@ export class GameController {
     const trees = rest.slice(0, a.trees.length);
     const bushes = rest.slice(a.trees.length, a.trees.length + a.bushes.length);
     const confetti = rest.slice(a.trees.length + a.bushes.length);
-    this.tex = { dollar, paypal, finishTape, finishFloor, obstacle, obstacleGlow };
+    this.tex = { dollar, paypal, obstacle, obstacleGlow };
 
     const scene = this.gameApp.scene;
     this.parallax = new Parallax(bg, trees, bushes, lamp);
@@ -138,7 +136,7 @@ export class GameController {
   /** Compile the MeshRope shader during INTRO (off the critical path) so breaking
    *  the finish tape — which swaps sprites for MeshRopes — never hitches. */
   private warmMeshShader(): void {
-    const warm = new MeshRope({ texture: this.tex.finishTape, points: [new Point(0, 0), new Point(10, 0)] });
+    const warm = new MeshRope({ texture: Texture.WHITE, points: [new Point(0, 0), new Point(10, 0)] });
     warm.alpha = 0.001;
     this.gameApp.scene.addChild(warm);
     setTimeout(() => warm.destroy(), 400);
@@ -243,7 +241,7 @@ export class GameController {
       this.enemies.push(e);
       if (entry.pauseForTutorial) this.tutorialEnemy = e;
     } else if (entry.type === 'finish') {
-      this.finishLine = new FinishLine(this.tex.finishTape, this.tex.finishFloor);
+      this.finishLine = new FinishLine();
       this.finishLine.x = spawnX;
       scene.addChild(this.finishLine);
       this.finishSpawned = true;
@@ -386,7 +384,7 @@ export class GameController {
 
   private checkFinish(): void {
     if (!this.finishLine || this.finishLine.isBroken) return;
-    if (this.finishLine.x + ROPE.TAPE_BREAK_OFFSET <= this.player.x) this.startDeceleration();
+    if (this.finishLine.x + FINISH.BREAK_OFFSET <= this.player.x) this.startDeceleration();
   }
 
   private startDeceleration(): void {
@@ -453,6 +451,19 @@ export class GameController {
   debugStep(frames = 1, dtMs = 16.667): void {
     for (let i = 0; i < frames; i++) this.update(dtMs);
     this.gameApp.app.render();
+  }
+
+  /**
+   * Dev preview for hand-tuning the finish gate. Parks the gate on screen with NO
+   * scrolling so you can tweak the FINISH block in src/config/constants.ts and see
+   * the result on every save. Open the game with `?finish` in the URL to trigger it.
+   */
+  debugParkFinish(): void {
+    if (this.finishLine) return;
+    this.tutorial.hide();
+    this.finishLine = new FinishLine();
+    this.finishLine.x = 0; // render at the authored design coords (left pole ≈ FINISH.LEFT_POLE_X)
+    this.gameApp.scene.addChild(this.finishLine);
   }
 
   /** Debug snapshot (dev only). */

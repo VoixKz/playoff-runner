@@ -29,6 +29,10 @@ async function boot(): Promise<void> {
   const game = new GameController(app, skin, audio, sdk, uiRoot);
   await game.init();
   (window as unknown as { __game: GameController }).__game = game;
+
+  // Dev: ?finish parks the finish gate on screen (no scrolling) for hand-tuning
+  // the FINISH block in src/config/constants.ts. Harmless in production.
+  if (location.search.includes('finish')) game.debugParkFinish();
 }
 
 void boot();

@@ -1,5 +1,5 @@
-import { Container, Graphics, MeshRope, Point, Sprite, Texture } from 'pixi.js';
-import { DESIGN_HEIGHT, DESIGN_WIDTH, PLAYER, ROPE, Z } from '../config/constants';
+import { Container, Graphics, MeshRope, PerspectiveMesh, Point, Sprite, Texture } from 'pixi.js';
+import { FINISH, Z } from '../config/constants';
 import { makeRopePoints, ropeSettled, stepRope, type RopePoint } from './rope';
 
 interface RopeHalf {
@@ -8,11 +8,16 @@ interface RopeHalf {
   mesh: MeshRope;
 }
 
+type Pt = { x: number; y: number };
+
 /**
- * Finish gate: two poles + a checker tape. While running the tape is ONE taut
- * ribbon stretched between the poles (intact). When the runner crosses, breakTape()
- * hides it and hangs a PixiJS MeshRope from each pole, driven by the verlet
- * integrator (rope.ts) so each half snaps and falls like cloth.
+ * Finish gate: a 4-corner checkered floor quad, two dark poles, and a yellow tape
+ * strung between the pole tops. ALL geometry/colour is read straight from the
+ * FINISH block in src/config/constants.ts — tune there, not here.
+ *
+ * While running the tape is ONE taut ribbon between the two pole tops. When the
+ * runner crosses, breakTape() hides it and hangs a PixiJS MeshRope from each pole
+ * (driven by the verlet integrator in rope.ts) so each half snaps and falls.
  */
 export class FinishLine extends Container {
   private tape: Sprite;
@@ -22,44 +27,67 @@ export class FinishLine extends Container {
   private settled = false;
   private readonly tapeTexture: Texture;
   private readonly floorTexture: Texture;
-  private readonly groundY: number;
-  private readonly tapeY: number;
-  private readonly leftPoleX = 50;
-  private readonly rightPoleX = DESIGN_WIDTH - 50;
 
-  constructor(tapeTexture: Texture, floorTexture: Texture) {
+  // The tape's own endpoints (design-space coords) — independent of the poles.
+  private readonly leftKnot: Pt = { x: FINISH.TAPE_LEFT_X, y: FINISH.TAPE_LEFT_Y };
+  private readonly rightKnot: Pt = { x: FINISH.TAPE_RIGHT_X, y: FINISH.TAPE_RIGHT_Y };
+
+  constructor() {
     super();
     this.zIndex = Z.FINISH_LINE;
-    this.tapeTexture = tapeTexture;
-    this.floorTexture = floorTexture;
-    this.groundY = DESIGN_HEIGHT - PLAYER.GROUND_Y;
-    this.tapeY = this.groundY - 232; // ~runner head height, so the runner breaks it
+    this.tapeTexture = makeBarTexture(); // built from FINISH.TAPE_COLOR/THICKNESS
+    this.floorTexture = makeCheckerTexture(); // built from FINISH.FLOOR_COLS/ROWS/COLOR_*
 
-    // checkered finish strip on the road (behind poles/tape)
+    // back-to-front: floor quad → poles → tape
     this.addChild(this.makeFloorPattern());
-    this.addChild(this.makePole(this.leftPoleX), this.makePole(this.rightPoleX));
-
-    // ONE continuous taut ribbon stretched pole-to-pole — intact until broken.
-    this.tape = new Sprite(tapeTexture);
-    this.tape.anchor.set(0, 0.5);
-    this.tape.position.set(this.leftPoleX, this.tapeY);
-    this.tape.width = this.rightPoleX - this.leftPoleX;
+    this.addChild(
+      this.makePole({ x: FINISH.LEFT_POLE_TOP_X, y: FINISH.LEFT_POLE_TOP_Y }, { x: FINISH.LEFT_POLE_BOT_X, y: FINISH.LEFT_POLE_BOT_Y }),
+      this.makePole({ x: FINISH.RIGHT_POLE_TOP_X, y: FINISH.RIGHT_POLE_TOP_Y }, { x: FINISH.RIGHT_POLE_BOT_X, y: FINISH.RIGHT_POLE_BOT_Y }),
+    );
+    this.tape = this.makeTape();
     this.addChild(this.tape);
   }
 
-  private makePole(x: number): Graphics {
-    const g = new Graphics();
-    g.rect(-6, this.tapeY - 20, 12, this.groundY - this.tapeY + 20).fill(0x4a3b6b);
-    g.x = x;
-    return g;
+  /** Checkered finish zone as a free 4-corner quad. The flat checker texture is
+   *  projected onto the four FINISH.FLOOR_* corners, so they alone set the shape. */
+  private makeFloorPattern(): PerspectiveMesh {
+    return new PerspectiveMesh({
+      texture: this.floorTexture,
+      verticesX: 20, // subdivision → smoother perspective on the checker
+      verticesY: 16,
+      x0: FINISH.FLOOR_TL_X, y0: FINISH.FLOOR_TL_Y, // top-left
+      x1: FINISH.FLOOR_TR_X, y1: FINISH.FLOOR_TR_Y, // top-right
+      x2: FINISH.FLOOR_BR_X, y2: FINISH.FLOOR_BR_Y, // bottom-right
+      x3: FINISH.FLOOR_BL_X, y3: FINISH.FLOOR_BL_Y, // bottom-left
+    });
   }
 
-  /** Perspective checkered finish zone painted on the road (reference `floorPattern`). */
-  private makeFloorPattern(): Sprite {
-    const floor = new Sprite(this.floorTexture);
-    floor.anchor.set(0.5, 0.55);
-    floor.position.set(DESIGN_WIDTH / 2, this.groundY - 20);
-    return floor;
+  /** A dark pole drawn as a thick line from its TOP point down to its BOTTOM point
+   *  (extended a touch above the top so it pokes past the tape knot). */
+  private makePole(top: Pt, bot: Pt): Graphics {
+    const dx = top.x - bot.x;
+    const dy = top.y - bot.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const tx = top.x + (dx / len) * FINISH.POLE_TOP_EXTRA; // poke past the knot
+    const ty = top.y + (dy / len) * FINISH.POLE_TOP_EXTRA;
+    return new Graphics()
+      .moveTo(tx, ty)
+      .lineTo(bot.x, bot.y)
+      .stroke({ width: FINISH.POLE_WIDTH, color: FINISH.POLE_COLOR, cap: 'round' });
+  }
+
+  /** One straight ribbon from the left endpoint to the right endpoint (tilted by their Y gap). */
+  private makeTape(): Sprite {
+    const dx = this.rightKnot.x - this.leftKnot.x;
+    const dy = this.rightKnot.y - this.leftKnot.y;
+    const length = Math.hypot(dx, dy);
+    const tape = new Sprite(this.tapeTexture);
+    tape.anchor.set(0, 0.5); // pin the left end, centre vertically
+    tape.position.set(this.leftKnot.x, this.leftKnot.y);
+    tape.width = length;
+    tape.height = FINISH.TAPE_THICKNESS;
+    tape.rotation = Math.atan2(dy, dx); // tilt to follow the endpoint-to-endpoint slope
+    return tape;
   }
 
   get isBroken(): boolean {
@@ -71,14 +99,20 @@ export class FinishLine extends Container {
     if (this.broken) return;
     this.broken = true;
     this.tape.visible = false;
-    this.halves.push(this.buildHalf(this.leftPoleX, 1)); // pinned at left pole, falls toward centre
-    this.halves.push(this.buildHalf(this.rightPoleX, -1)); // pinned at right pole
+    const dx = this.rightKnot.x - this.leftKnot.x;
+    const dy = this.rightKnot.y - this.leftKnot.y;
+    const length = Math.hypot(dx, dy);
+    const ux = dx / length;
+    const uy = dy / length;
+    // each half spans pole → midpoint, along the tape's own slope
+    this.halves.push(this.buildHalf(this.leftKnot, ux, uy, length / 2));
+    this.halves.push(this.buildHalf(this.rightKnot, -ux, -uy, length / 2));
   }
 
-  private buildHalf(poleX: number, dirX: number): RopeHalf {
-    const length = (this.rightPoleX - this.leftPoleX) / 2; // pole → centre
-    const spacing = length / (ROPE.SEGMENTS - 1);
-    const points = makeRopePoints({ x: poleX, y: this.tapeY }, { x: dirX, y: 0 }, ROPE.SEGMENTS, spacing);
+  private buildHalf(knot: Pt, dirX: number, dirY: number, length: number): RopeHalf {
+    const segments = 10;
+    const spacing = length / (segments - 1);
+    const points = makeRopePoints({ x: knot.x, y: knot.y }, { x: dirX, y: dirY }, segments, spacing);
     const meshPoints = points.map((p) => new Point(p.x, p.y));
     const mesh = new MeshRope({ texture: this.tapeTexture, points: meshPoints });
     this.addChild(mesh);
@@ -105,4 +139,40 @@ export class FinishLine extends Container {
     }
     this.settled = allSettled;
   }
+}
+
+/** Build the finish-floor checker as a FLAT texture from the FINISH cell settings.
+ *  The PerspectiveMesh quad supplies the perspective; this is just a plain grid, so
+ *  FLOOR_COLS / FLOOR_ROWS directly control how many squares appear across / down. */
+function makeCheckerTexture(): Texture {
+  const cols = Math.max(1, FINISH.FLOOR_COLS);
+  const rows = Math.max(1, FINISH.FLOOR_ROWS);
+  const cell = 24; // source px per square (texture sharpness, not the on-screen size)
+  const canvas = document.createElement('canvas');
+  canvas.width = cols * cell;
+  canvas.height = rows * cell;
+  const ctx = canvas.getContext('2d')!;
+  const a = '#' + FINISH.FLOOR_COLOR_A.toString(16).padStart(6, '0');
+  const b = '#' + FINISH.FLOOR_COLOR_B.toString(16).padStart(6, '0');
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      ctx.fillStyle = (r + c) % 2 === 0 ? a : b;
+      ctx.fillRect(c * cell, r * cell, cell, cell);
+    }
+  }
+  return Texture.from(canvas);
+}
+
+/** Build the tape ribbon as a solid colour bar from the FINISH tape settings.
+ *  Used both for the taut sprite and (stretched along the rope) for the torn halves. */
+function makeBarTexture(): Texture {
+  const h = Math.max(1, Math.round(FINISH.TAPE_THICKNESS));
+  const w = 32; // width is arbitrary — the sprite/rope stretches it along its length
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d')!;
+  ctx.fillStyle = '#' + FINISH.TAPE_COLOR.toString(16).padStart(6, '0');
+  ctx.fillRect(0, 0, w, h);
+  return Texture.from(canvas);
 }

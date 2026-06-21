@@ -90,7 +90,64 @@ export const ROPE = {
   MIN_ANIMATION_TIME: 1,
   SEGMENT_DISTANCE: 10,
   CONSTRAINT_STIFFNESS: 0.5,
-  TAPE_BREAK_OFFSET: 50, // break when the runner reaches the tape (left pole = finish.x + 50)
+} as const;
+
+/**
+ * ┌──────────────────────────────────────────────────────────────────────────┐
+ * │  FINISH GATE — hand-tuning panel                                           │
+ * │  Everything about how the finish looks lives HERE. Edit these numbers      │
+ * │  and refresh the game — no other file needs touching.                      │
+ * └──────────────────────────────────────────────────────────────────────────┘
+ *
+ * COORDINATE SYSTEM (design space, 720 wide × 1280 tall):
+ *   • X grows to the RIGHT  →   0 = far left,  360 = centre,  720 = far right
+ *   • Y grows DOWNWARD      ↓   0 = top,  1000 = the runner's feet,  1280 = bottom
+ *   • The purple road sits around Y ≈ 1000 (that's where the player stands).
+ *   • Smaller Y = HIGHER on screen.  Bigger Y = LOWER on screen.
+ *
+ * The gate is 3 pieces: a 4-corner checkered FLOOR quad, two dark POLES (each a
+ * free top→bottom line), and the yellow TAPE between the pole tops. Tune in that
+ * order. Open the game with `?finish` to park the gate on screen and tune live.
+ */
+export const FINISH = {
+  // ── 1 · CHECKERED FLOOR — a free 4-corner quad (drag each corner) ───────────
+  //   Four fully independent corners — make it a parallelogram, a trapezoid,
+  //   whatever sits flat on the purple road. Each corner is (X right+, Y down+).
+  //   The texture is a FLAT checker; THESE corners create all the perspective.
+  //   Default = parallelogram sheared LEFT (top edge shifted left of the bottom).
+  FLOOR_TL_X: 30, FLOOR_TL_Y: 885, //  top-left      ┌
+  FLOOR_TR_X: 730, FLOOR_TR_Y: 885, //  top-right     ┐
+  FLOOR_BR_X: 820, FLOOR_BR_Y: 1005, //  bottom-right ┘
+  FLOOR_BL_X: 120, FLOOR_BL_Y: 1005, //  bottom-left  └
+  //   Cell frequency — the checker is generated from these, so change them freely:
+  FLOOR_COLS: 39, //  how many squares ACROSS (width).  Bigger = NARROWER cells.
+  FLOOR_ROWS: 8, //   how many squares DOWN (height).   Bigger = SHORTER cells.
+  FLOOR_COLOR_A: 0xf5f5f8, //  light squares.
+  FLOOR_COLOR_B: 0x262234, //  dark squares.
+
+  // ── 2 · POLES — each pole is a line from a TOP point to a BOTTOM point ───────
+  //   Full control of BOTH coordinates of BOTH ends of EACH pole. The tape ties
+  //   to each pole's TOP point, so moving a TOP also moves that end of the tape.
+  POLE_COLOR: 0x2e2a3a, //  dark grey-purple.  0x000000 = black, 0x3a2f4a = darker violet.
+  POLE_WIDTH: 9, //  thickness of each pole in px.
+  POLE_TOP_EXTRA: 18, //  how far the pole pokes UP past its TOP point (above the tape knot).
+  LEFT_POLE_TOP_X: 35, LEFT_POLE_TOP_Y: 805, //   LEFT pole — TOP end (tape ties here)
+  LEFT_POLE_BOT_X: 35, LEFT_POLE_BOT_Y: 885, //  LEFT pole — BOTTOM end (on the ground)
+  RIGHT_POLE_TOP_X: 120, RIGHT_POLE_TOP_Y: 888, //  RIGHT pole — TOP end (tape ties here)
+  RIGHT_POLE_BOT_X: 120, RIGHT_POLE_BOT_Y: 1005, // RIGHT pole — BOTTOM end (on the ground)
+
+  // ── 3 · TAPE — the taut ribbon (its OWN endpoints, colour & thickness) ──────
+  //   The tape is generated in code (no texture), so the colour is exactly what
+  //   you set here. Its two ends are independent points — by default they sit on
+  //   the pole tops; move them freely to slide/tilt/detach the ribbon.
+  TAPE_LEFT_X: 35, TAPE_LEFT_Y: 805, //   LEFT end of the tape
+  TAPE_RIGHT_X: 120, TAPE_RIGHT_Y: 888, // RIGHT end of the tape  (different Ys = tilt)
+  TAPE_COLOR: 0xf2c200, //  ribbon colour (0xRRGGBB).  e.g. 0xff3b3b = red, 0xffffff = white.
+  TAPE_THICKNESS: 9, //    ribbon height in px (also the thickness of the torn halves).
+
+  // ── 4 · BREAK TIMING (when the runner tears through the tape) ───────────────
+  //   The tape snaps when the LEFT pole reaches the player. Keep ≈ LEFT_POLE_TOP_X.
+  BREAK_OFFSET: 120,
 } as const;
 
 export const CONFETTI = {
